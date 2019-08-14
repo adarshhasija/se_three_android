@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+                                             xmlns:android="http://schemas.android.com/apk/res/android"
+                                             xmlns:tools="http://schemas.android.com/tools"
+                                             android:layout_width="match_parent"
+                                             android:layout_height="match_parent"
+                                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                                             tools:context=".fragments.ChatModeFragment">
+
+    <RelativeLayout
+            android:id="@+id/rlStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" >
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:layout_margin="10dp"
+                android:text="@string/this_user_is_deaf" />
+
+    </RelativeLayout>
+
+
+
+
+    <LinearLayout
+            android:id="@+id/llMainAction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/llTypeTalk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1"
+            android:orientation="horizontal">
+
+            <Button android:id="@+id/btnType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#0000FF"
+                    android:textColor="#FFFFFF"
+                    android:layout_weight="0.5"
+                    android:layout_margin="5dp"
+                    android:text="@string/type"/>
+
+            <Button android:id="@+id/btnTalk"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#0000FF"
+                    android:textColor="#FFFFFF"
+                    android:layout_weight="0.5"
+                    android:layout_margin="5dp"
+                    android:text="@string/talk" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+                android:id="@+id/llShareClear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="1"
+                android:orientation="horizontal">
+
+            <Button android:id="@+id/btnShare"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#008000"
+                    android:textColor="#FFFFFF"
+                    android:layout_weight="0.5"
+                    android:layout_margin="5dp"
+                    android:text="@string/share"/>
+
+            <Button android:id="@+id/btnClear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#FF0000"
+                    android:textColor="#FFFFFF"
+                    android:layout_weight="0.5"
+                    android:layout_margin="5dp"
+                    android:text="@string/clear" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <RelativeLayout
+            android:id="@+id/fragment_container_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/llMainAction" >
+
+    </RelativeLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

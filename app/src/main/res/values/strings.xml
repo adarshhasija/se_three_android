@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Suno</string>
+
+    <string name="type">Type</string>
+    <string name="talk">Talk</string>
+    <string name="share">Share</string>
+    <string name="clear">Clear</string>
+    <string name="done">Done</string>
+    <string name="start_typing_here">Start typing here</string>
+    <string name="start_talking">Start Talking</string>
+    <string name="tap_screen_stop_recording">Tap Screen to Stop Recording</string>
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="you_must_be_connected_to_internet">"You must be connected to the internet"</string>
+    <string name="error">Error</string>
+    <string name="some_issue_occured">Some issue occured. Please try again</string>
+    <string name="no_conversations_in_progress">No conversation in progress.\nUse the options provided to begin</string>
+    <string name="this_user_is_deaf">This person is deaf/hearing-impaired. Please answer their doubts by using the Type or Talk options at the bottom of the screen</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="this_action_cannot_be_undone">This action cannot be undone</string>
+    <string name="error_saying_text">Error saying text</string>
+    <string name="volume_low_error">Your volume is low. You might not be able to hear</string>
+
+
+</resources>

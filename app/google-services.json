@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "215757859591",
+    "firebase_url": "https://starsearth-59af6.firebaseio.com",
+    "project_id": "starsearth-59af6",
+    "storage_bucket": "starsearth-59af6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:215757859591:android:e2a6283c67846cb4",
+        "android_client_info": {
+          "package_name": "com.starsearth.one"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "215757859591-aqam9t0m0rl275rpkc7r37nb2jjit7h0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.starsearth.one",
+            "certificate_hash": "a40bc903368a2ad4b753dd7f6a1c51ce0465d2a6"
+          }
+        },
+        {
+          "client_id": "215757859591-icqtq2d65llp4hs95193taoqh396kv03.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.starsearth.one",
+            "certificate_hash": "a27dab4bd5f9c52228f09ef24b5fc3456be19fba"
+          }
+        },
+        {
+          "client_id": "215757859591-jl5okctgo7v9ektqvb7ttev8g76gatbg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQcoAuwEbU_RsV3064XvKwpvD-xvF8RCM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "215757859591-22kh4csg763i2stncb73hqnleqbrifnu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "215757859591-k97ng04806sdhbscth8nqcvn8i2p30ba.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.starsearth.four"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:215757859591:android:3382163f820a542b",
+        "android_client_info": {
+          "package_name": "com.starsearth.three"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "215757859591-jl5okctgo7v9ektqvb7ttev8g76gatbg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQcoAuwEbU_RsV3064XvKwpvD-xvF8RCM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "215757859591-22kh4csg763i2stncb73hqnleqbrifnu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "215757859591-k97ng04806sdhbscth8nqcvn8i2p30ba.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.starsearth.four"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
