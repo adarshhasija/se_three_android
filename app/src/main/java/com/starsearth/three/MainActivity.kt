@@ -91,6 +91,11 @@ class MainActivity : AppCompatActivity(),
         val chatListItem = ChatListItem(finalText, dateFormat.format(Date()).toString(), "", "typing")
         val chatModeFragment = supportFragmentManager?.findFragmentByTag(ChatModeFragment.TAG)
         (chatModeFragment as? ChatModeFragment)?.addChatListItem(chatListItem)
+
+        val speechStatus = textToSpeech?.speak(finalText, TextToSpeech.QUEUE_FLUSH, null)
+        if (speechStatus == TextToSpeech.ERROR) {
+            dialogOK(getString(com.starsearth.three.R.string.error), getString(com.starsearth.three.R.string.error_saying_text))
+        }
     }
 
     override fun onTypeButtonTapped() {
