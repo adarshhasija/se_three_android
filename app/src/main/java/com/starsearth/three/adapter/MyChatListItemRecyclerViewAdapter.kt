@@ -3,7 +3,9 @@ package com.starsearth.three.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.starsearth.three.R
 import com.starsearth.three.domain.ChatListItem
@@ -41,8 +43,17 @@ class MyChatListItemRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mValues[position]
-        holder.mContentView.text = item.message
-        holder.mTimeView.text = item.time
+        if (item.mode == "talking") {
+            holder.mGuestView.findViewById<TextView>(R.id.content).text = item.message
+            holder.mGuestView.findViewById<TextView>(R.id.tvTime).text = item.time
+            holder.mGuestView.visibility = View.VISIBLE
+        }
+        else {
+            holder.mHostView.findViewById<TextView>(R.id.content).text = item.message
+            holder.mHostView.findViewById<TextView>(R.id.tvTime).text = item.time
+            holder.mHostView.visibility = View.VISIBLE
+        }
+
 
         with(holder.mView) {
             tag = item
@@ -53,16 +64,20 @@ class MyChatListItemRecyclerViewAdapter(
     override fun getItemCount(): Int = mValues.size
 
     inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
-        val mContentView: TextView
-        val mTimeView: TextView
+        //val mContentView: TextView
+        //val mTimeView: TextView
+        val mHostView: FrameLayout
+        val mGuestView: FrameLayout
 
         init {
-            mContentView = mView.findViewById(R.id.content) as TextView
-            mTimeView = mView.findViewById(R.id.tvTime) as TextView
+            //mContentView = mView.findViewById(R.id.content) as TextView
+            //mTimeView = mView.findViewById(R.id.tvTime) as TextView
+            mHostView = mView.findViewById(R.id.flHost) as FrameLayout
+            mGuestView = mView.findViewById(R.id.flGuest) as FrameLayout
         }
 
         override fun toString(): String {
-            return super.toString() + " '" + mContentView.text + "'"
+            return super.toString()// + " '" + mContentView.text + "'"
         }
     }
 }

@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity(),
 
     override fun onTalkingCompleted(finalText: String) {
         val dateFormat = SimpleDateFormat("h:mm a")
-        val chatListItem = ChatListItem(finalText, dateFormat.format(Date()).toString(), "")
+        val chatListItem = ChatListItem(finalText, dateFormat.format(Date()).toString(), "", "talking")
         val chatModeFragment = supportFragmentManager?.findFragmentByTag(ChatModeFragment.TAG)
         (chatModeFragment as? ChatModeFragment)?.addChatListItem(chatListItem)
         supportFragmentManager?.popBackStack()
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity(),
         supportFragmentManager?.popBackStack()
 
         val dateFormat = SimpleDateFormat("h:mm a")
-        val chatListItem = ChatListItem(finalText, dateFormat.format(Date()).toString(), "")
+        val chatListItem = ChatListItem(finalText, dateFormat.format(Date()).toString(), "", "typing")
         val chatModeFragment = supportFragmentManager?.findFragmentByTag(ChatModeFragment.TAG)
         (chatModeFragment as? ChatModeFragment)?.addChatListItem(chatListItem)
     }
