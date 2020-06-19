@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Suno</string>
+    <string name="app_name">SunoDayko</string>
 
     <string name="type">Type</string>
     <string name="talk">Talk</string>
@@ -19,6 +19,9 @@
     <string name="this_action_cannot_be_undone">This action cannot be undone</string>
     <string name="error_saying_text">Error saying text</string>
     <string name="volume_low_error">Your volume is low. You might not be able to hear</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>

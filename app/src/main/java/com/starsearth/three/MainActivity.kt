@@ -1,6 +1,7 @@
 package com.starsearth.three
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import com.starsearth.three.fragments.ChatModeFragment
@@ -8,26 +9,22 @@ import com.starsearth.three.fragments.TypingFragment
 import android.view.inputmethod.InputMethodManager
 import com.starsearth.three.fragments.TalkingFragment
 import android.content.DialogInterface
+import android.content.Intent
 import com.starsearth.three.domain.ChatListItem
 import com.starsearth.three.fragments.lists.ChatListItemFragment
 import java.text.SimpleDateFormat
 import java.util.*
 import android.speech.tts.TextToSpeech
-import android.util.Log
-import android.widget.Toast
-import android.R.attr.data
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.AudioManager
 import android.os.Build
-import android.os.PersistableBundle
-import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
 import androidx.fragment.app.Fragment
 import com.starsearth.three.application.StarsEarthApplication
+import com.starsearth.three.fragments.ActionsFragment
 import com.starsearth.three.managers.AnalyticsManager
 import kotlinx.android.synthetic.main.fragment_chat_mode.*
 
@@ -36,6 +33,7 @@ class MainActivity : AppCompatActivity(),
                     ChatModeFragment.OnChatModeFragmentInteractionListener,
                     TalkingFragment.OnFragmentInteractionListener,
                     ChatListItemFragment.OnChatListFragmentInteractionListener,
+                    ActionsFragment.OnActionsFragmentInteractionListener,
                     TypingFragment.OnTypingFragmentInteractionListener {
 
     override fun checkPermissionsForSpeechToText() {
@@ -130,12 +128,13 @@ class MainActivity : AppCompatActivity(),
     }
 
     private var textToSpeech: TextToSpeech? = null
+    val CAMERA_ACTIVITY = 100
     //private lateinit var mChatModeFragment : ChatModeFragment
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        textToSpeech = TextToSpeech(applicationContext, TextToSpeech.OnInitListener { status ->
+      /*  textToSpeech = TextToSpeech(applicationContext, TextToSpeech.OnInitListener { status ->
             if (status == TextToSpeech.SUCCESS) {
                 val ttsLang = textToSpeech?.setLanguage(Locale.US)
 
@@ -148,12 +147,13 @@ class MainActivity : AppCompatActivity(),
             } else {
                 Toast.makeText(applicationContext, "TTS Initialization failed!", Toast.LENGTH_SHORT).show()
             }
-        })
+        })  */
 
-        val chatModeFragment = ChatModeFragment.newInstance("","")
+        //val chatModeFragment = ChatModeFragment.newInstance("","")
+        val actionsFragment = ActionsFragment.newInstance("", "")
         getSupportFragmentManager()?.beginTransaction()
-            ?.replace(R.id.fragment_container_main, chatModeFragment, ChatModeFragment.TAG)
-            ?.addToBackStack(ChatModeFragment.TAG)
+            ?.replace(R.id.fragment_container_main, actionsFragment, ActionsFragment.TAG)
+            ?.addToBackStack(ActionsFragment.TAG)
             ?.commit()
     }
 
@@ -204,6 +204,19 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == CAMERA_ACTIVITY) {
+            if (resultCode == Activity.RESULT_OK) {
+                val extras = data?.extras
+                val cameraText = extras?.getString("text")
+                val actionsFragment = supportFragmentManager?.findFragmentByTag(ActionsFragment.TAG)
+                (actionsFragment as? ActionsFragment)?.cameraResultReceived(cameraText)
+            }
+        }
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
@@ -228,5 +241,10 @@ class MainActivity : AppCompatActivity(),
                 // Ignore all other requests.
             }
         }
+    }
+
+    override fun openCameraActivity() {
+        val intent = Intent(this, CameraActivity::class.java)
+        startActivityForResult(intent, CAMERA_ACTIVITY)
     }
 }
