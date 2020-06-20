@@ -2,6 +2,7 @@ package com.starsearth.three.managers
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.starsearth.three.BuildConfig
@@ -121,6 +122,14 @@ class AnalyticsManager(private val mContext: Context) {
         logActionEvent("se3_row_selected", bundle)
     }
 
+    fun sendAnalyticsForCameraReturn() {
+        val bundle = Bundle()
+        logActionEvent("se3_android_cam_ret", bundle)
+    }
 
-
+    fun sendAnalyticsForAction(action: String) {
+        val bundle = Bundle()
+        bundle.putString("state", action)
+        logActionEvent("se3_android_swipe_up", bundle)
+    }
 }

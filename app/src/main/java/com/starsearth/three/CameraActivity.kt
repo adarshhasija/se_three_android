@@ -52,8 +52,8 @@ class CameraActivity : AppCompatActivity() {
 
         // Request camera permissions
         if (allPermissionsGranted()) {
-            startCamera()
             (application as? StarsEarthApplication)?.sayThis(tvInstructions?.text?.toString())
+            startCamera()
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
@@ -65,6 +65,14 @@ class CameraActivity : AppCompatActivity() {
         outputDirectory = getOutputDirectory()
 
         cameraExecutor = Executors.newSingleThreadExecutor()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        if ((application as? StarsEarthApplication)?.textToSpeech?.isSpeaking == true) {
+            (application as? StarsEarthApplication)?.textToSpeech?.stop()
+        }
     }
 
     private fun startCamera() {
@@ -252,23 +260,21 @@ private class CameraFeedAnalyzer (private val activity: Activity) : ImageAnalysi
                             val lineFrame = line.boundingBox
                             for (element in line.elements) {
                                 val elementText = element.text
-                                Log.d("TAG", "*********ELEMENT TEXT IS: "+ elementText)
                                 val elementCornerPoints = element.cornerPoints
                                 val elementFrame = element.boundingBox
                             }
                         }
                     }
-                    Log.d("TAG", "*******TEXT IS: " + txt)
                     val bundle = Bundle()
                     bundle.putString("text", txt)
                     val intent = Intent()
                     intent.putExtras(bundle)
-                    mActivity?.setResult(Activity.RESULT_OK, intent)
-                    mActivity?.finish()
+                    mActivity.setResult(Activity.RESULT_OK, intent)
+                    mActivity.finish()
                 }
                 .addOnFailureListener { e ->
                     // Task failed with an exception
-                    Log.d("TAG", "*******FAILED********"+e.message)
+                    Log.d("TAG", "*******TEXT RECOGNITION FAILED********"+e.message)
                 }
 
         }

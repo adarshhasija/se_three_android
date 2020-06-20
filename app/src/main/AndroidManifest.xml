@@ -16,9 +16,9 @@
     <application
             android:name=".application.StarsEarthApplication"
             android:allowBackup="true"
-            android:icon="@mipmap/app_icon_suno_80x80"
+            android:icon="@mipmap/sunodayko_launcher"
             android:label="@string/app_name"
-            android:roundIcon="@mipmap/app_icon_suno_80x80"
+            android:roundIcon="@mipmap/sunodayko_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity android:name=".CameraActivity">

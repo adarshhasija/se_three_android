@@ -64,13 +64,16 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
 
     fun cameraResultReceived(text: String?) {
         if (text?.isEmpty() == false) {
+            (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForCameraReturn()
             (mContext.applicationContext as? StarsEarthApplication)?.sayThis(text)
             (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext,"RESULT_SUCCESS")
             tvAlphanumerics?.text = text
             tvMorseCode?.text = ""
             tvMorseCode?.textSize = 20f
             tvBlindUsersTap?.visibility = View.VISIBLE
-            tvInstructions?.text = "Swipe left to reset"
+            val str = "Swipe left to reset"
+            tvInstructions?.text = str
+            view?.contentDescription = str
         }
     }
 
@@ -152,17 +155,24 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     }
 
     override fun gestureSwipeUp() {
-        var currentMorseCodeText = tvMorseCode.text.toString()
-        val difference = 3 - currentMorseCodeText.length
-        if (difference > 0) {
-            val str = "You need to tap " + difference + " more times"
-            tvInstructions?.text = str
-            view?.contentDescription = str //for talkback
-            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext,"RESULT_FAILURE")
+        if (tvAlphanumerics?.text?.isEmpty() == true) {
+            var currentMorseCodeText = tvMorseCode.text.toString()
+            val difference = 3 - currentMorseCodeText.length
+            if (difference > 0) {
+                val str = "You need to tap " + difference + " more times"
+                tvInstructions?.text = str
+                view?.contentDescription = str //for talkback
+                (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext,"RESULT_FAILURE")
+            }
+            else {
+                (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext,"RESULT_SUCCESS")
+                (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction("action_CAMERA")
+                listener?.openCameraActivity()
+            }
         }
         else {
-            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext,"RESULT_SUCCESS")
-            listener?.openCameraActivity()
+            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext,"RESULT_FAILURE")
+            (mContext.applicationContext as? StarsEarthApplication)?.sayThis(tvInstructions?.text?.toString())
         }
     }
 
