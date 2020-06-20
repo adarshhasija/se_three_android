@@ -58,10 +58,10 @@ class StarsEarthApplication : Application() {
 
     fun vibrate(context: Context, type: String) {
         var timeMillis : Long = 0
-        if (type == "MC_DOT" || type == "MC_DASH") {
+        if (type == "MC_DOT" || type == "MC_DASH" || type == "RESULT_FAILURE") {
             timeMillis = 50
         }
-        else if (type == "RESULT_SUCCESS" || type == "RESULT_FAILURE") {
+        else if (type == "RESULT_SUCCESS") {
             timeMillis = 500
         }
         val v = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
@@ -71,6 +71,13 @@ class StarsEarthApplication : Application() {
             if (type == "MC_DASH" || type == "RESULT_FAILURE") {
                 Timer("SecondVibration", false).schedule(timeMillis + 100) {
                     v.vibrate(VibrationEffect.createOneShot(timeMillis, VibrationEffect.DEFAULT_AMPLITUDE))
+                }
+
+                if (type == "RESULT_FAILURE") {
+                    //Three short vibrations for failure
+                    Timer("ThirdVibration", false).schedule(timeMillis + (timeMillis + 100) + 100) {
+                        v.vibrate(VibrationEffect.createOneShot(timeMillis, VibrationEffect.DEFAULT_AMPLITUDE))
+                    }
                 }
             }
         } else {

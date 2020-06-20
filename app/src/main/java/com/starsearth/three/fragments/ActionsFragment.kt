@@ -58,7 +58,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
         super.onViewCreated(view, savedInstanceState)
 
         tvInstructions?.text = startingInstruction
-        view?.contentDescription = startingInstruction
+        view.contentDescription = startingInstruction
         view.setOnTouchListener(SeOnTouchListener(this))
     }
 
@@ -153,8 +153,6 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
 
     override fun gestureSwipeUp() {
         var currentMorseCodeText = tvMorseCode.text.toString()
-        currentMorseCodeText += "."
-        tvMorseCode?.text = currentMorseCodeText
         val difference = 3 - currentMorseCodeText.length
         if (difference > 0) {
             val str = "You need to tap " + difference + " more times"

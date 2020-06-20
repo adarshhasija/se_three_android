@@ -1,5 +1,6 @@
 package com.starsearth.two.listeners
 
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import java.util.*
@@ -22,14 +23,14 @@ class SeOnTouchListener(val context : OnSeTouchListenerInterface?) : View.OnTouc
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
         when (event?.getAction()) {
             MotionEvent.ACTION_DOWN -> {
-                x1 = event?.getX()
-                y1 = event?.getY()
+                x1 = event.getX()
+                y1 = event.getY()
                 actionDownTimestamp = Calendar.getInstance().timeInMillis
             }
             MotionEvent.ACTION_UP -> {
                 val actionUpTimestamp = Calendar.getInstance().timeInMillis
-                x2 = event?.getX()
-                y2 = event?.getY()
+                x2 = event.getX()
+                y2 = event.getY()
                 val deltaX = x2 - x1
                 val deltaY = y2 - y1
                 if (Math.abs(deltaX) < MIN_DISTANCE && -deltaY > MIN_DISTANCE) {
