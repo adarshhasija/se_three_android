@@ -24,19 +24,28 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
             <TextView
+                    android:id="@+id/tvMorseCode"
+                    android:layout_gravity="center"
+                    android:textSize="60sp"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            <TextView
                     android:id="@+id/tvBlindUsersTap"
                     android:layout_gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:text="Visually-Impaired Users:\nTap once to hear audio"
                     android:visibility="gone" />
     </LinearLayout>
 
 
     <TextView
+            android:id="@+id/tvInstructions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tap screen to open camera"
+            android:gravity="center"
             android:textStyle="bold"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             app:layout_constraintTop_toTopOf="parent"

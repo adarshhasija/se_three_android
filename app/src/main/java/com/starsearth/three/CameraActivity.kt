@@ -25,6 +25,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
+import com.starsearth.three.application.StarsEarthApplication
 import kotlinx.android.synthetic.main.activity_camera.*
 import java.io.File
 import java.nio.ByteBuffer
@@ -52,6 +53,7 @@ class CameraActivity : AppCompatActivity() {
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
+            (application as? StarsEarthApplication)?.sayThis(tvInstructions?.text?.toString())
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)

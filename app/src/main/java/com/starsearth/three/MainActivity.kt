@@ -19,6 +19,8 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.AudioManager
 import android.os.Build
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
@@ -55,10 +57,7 @@ class MainActivity : AppCompatActivity(),
         if (currentVolume < (maxVolume/2)) {
             dialogOK(getString(com.starsearth.three.R.string.error), getString(com.starsearth.three.R.string.volume_low_error))
         }
-        val speechStatus = textToSpeech?.speak(chatListItem.message, TextToSpeech.QUEUE_FLUSH, null)
-        if (speechStatus == TextToSpeech.ERROR) {
-            dialogOK(getString(com.starsearth.three.R.string.error), getString(com.starsearth.three.R.string.error_saying_text))
-        }
+        (application as? StarsEarthApplication)?.sayThis(chatListItem.message)
     }
 
 
@@ -90,10 +89,7 @@ class MainActivity : AppCompatActivity(),
         val chatModeFragment = supportFragmentManager?.findFragmentByTag(ChatModeFragment.TAG)
         (chatModeFragment as? ChatModeFragment)?.addChatListItem(chatListItem)
 
-        val speechStatus = textToSpeech?.speak(finalText, TextToSpeech.QUEUE_FLUSH, null)
-        if (speechStatus == TextToSpeech.ERROR) {
-            dialogOK(getString(com.starsearth.three.R.string.error), getString(com.starsearth.three.R.string.error_saying_text))
-        }
+        (application as? StarsEarthApplication)?.sayThis(finalText)
     }
 
     override fun onTypeButtonTapped() {
@@ -134,7 +130,7 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-      /*  textToSpeech = TextToSpeech(applicationContext, TextToSpeech.OnInitListener { status ->
+     /*   textToSpeech = TextToSpeech(applicationContext, TextToSpeech.OnInitListener { status ->
             if (status == TextToSpeech.SUCCESS) {
                 val ttsLang = textToSpeech?.setLanguage(Locale.US)
 
@@ -155,6 +151,13 @@ class MainActivity : AppCompatActivity(),
             ?.replace(R.id.fragment_container_main, actionsFragment, ActionsFragment.TAG)
             ?.addToBackStack(ActionsFragment.TAG)
             ?.commit()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if ((application as? StarsEarthApplication)?.textToSpeech?.isSpeaking == true) {
+            (application as? StarsEarthApplication)?.textToSpeech?.stop()
+        }
     }
 
     override fun onBackPressed() {
