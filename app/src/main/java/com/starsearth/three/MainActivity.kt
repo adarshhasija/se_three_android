@@ -149,7 +149,7 @@ class MainActivity : AppCompatActivity(),
         val actionsFragment = ActionsFragment.newInstance("", "")
         getSupportFragmentManager()?.beginTransaction()
             ?.replace(R.id.fragment_container_main, actionsFragment, ActionsFragment.TAG)
-            ?.addToBackStack(ActionsFragment.TAG)
+            //?.addToBackStack(ActionsFragment.TAG)
             ?.commit()
     }
 
@@ -160,7 +160,7 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    override fun onBackPressed() {
+  /*  override fun onBackPressed() {
         val fragmentCount = supportFragmentManager.fragments.size
         if (fragmentCount > 0) {
             val lastFragment = supportFragmentManager?.fragments?.get(fragmentCount - 1)
@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity(),
 
         super.onBackPressed()
 
-    }
+    }   */
 
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
