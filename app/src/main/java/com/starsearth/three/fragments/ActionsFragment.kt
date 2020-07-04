@@ -70,10 +70,9 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
             tvAlphanumerics?.text = text
             tvMorseCode?.text = ""
             tvMorseCode?.textSize = 20f
-            tvBlindUsersTap?.visibility = View.VISIBLE
             val str = "Swipe left to reset"
             tvInstructions?.text = str
-            view?.contentDescription = str
+            view?.contentDescription = text + "\n" + str
         }
     }
 
@@ -182,7 +181,6 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
             tvAlphanumerics?.text = ""
             tvMorseCode?.text = ""
             tvMorseCode?.textSize = 40f
-            tvBlindUsersTap?.visibility = View.GONE
             tvInstructions?.text = startingInstruction
             view?.contentDescription = startingInstruction
             (mContext.applicationContext as? StarsEarthApplication)?.sayThis(startingInstruction)

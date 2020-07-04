@@ -109,6 +109,8 @@ class CameraActivity : AppCompatActivity() {
                 camera = cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview, imageCapture, imageAnalyzer)
                 preview?.setSurfaceProvider(viewFinder.createSurfaceProvider(camera?.cameraInfo))
+                cl?.contentDescription = tvInstructions?.text.toString()
+                (applicationContext as? StarsEarthApplication)?.sayThis(tvInstructions?.text.toString())
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
@@ -265,12 +267,14 @@ private class CameraFeedAnalyzer (private val activity: Activity) : ImageAnalysi
                             }
                         }
                     }
-                    val bundle = Bundle()
-                    bundle.putString("text", txt)
-                    val intent = Intent()
-                    intent.putExtras(bundle)
-                    mActivity.setResult(Activity.RESULT_OK, intent)
-                    mActivity.finish()
+                    if (txt.isBlank() == false) {
+                        val bundle = Bundle()
+                        bundle.putString("text", txt)
+                        val intent = Intent()
+                        intent.putExtras(bundle)
+                        mActivity.setResult(Activity.RESULT_OK, intent)
+                        mActivity.finish()
+                    }
                 }
                 .addOnFailureListener { e ->
                     // Task failed with an exception
