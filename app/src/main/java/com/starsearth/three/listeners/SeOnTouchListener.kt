@@ -18,6 +18,7 @@ class SeOnTouchListener(val context : OnSeTouchListenerInterface?) : View.OnTouc
     private var y1:Float = 0.toFloat()
     private var y2:Float = 0.toFloat()
     private var actionDownTimestamp : Long = 0
+    private var numberOfFingers = 1
     internal val MIN_DISTANCE = 150
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -26,6 +27,9 @@ class SeOnTouchListener(val context : OnSeTouchListenerInterface?) : View.OnTouc
                 x1 = event.getX()
                 y1 = event.getY()
                 actionDownTimestamp = Calendar.getInstance().timeInMillis
+            }
+            MotionEvent.ACTION_MOVE -> {
+                numberOfFingers = event.pointerCount
             }
             MotionEvent.ACTION_UP -> {
                 val actionUpTimestamp = Calendar.getInstance().timeInMillis
@@ -37,17 +41,31 @@ class SeOnTouchListener(val context : OnSeTouchListenerInterface?) : View.OnTouc
                     mListener?.gestureSwipeUp()
                 }
                 else if (-deltaX > MIN_DISTANCE && Math.abs(deltaY) < MIN_DISTANCE) {
-                    mListener?.gestureSwipeLeft()
+                    if (numberOfFingers > 1) {
+                        mListener?.gestureSwipeLeft2Fingers()
+                    }
+                    else {
+                        mListener?.gestureSwipeLeft()
+                    }
+                }
+                else if (deltaX > MIN_DISTANCE && Math.abs(deltaY) < MIN_DISTANCE) {
+                    if (numberOfFingers > 1) {
+                        mListener?.gestureSwipeRight2Fingers()
+                    }
+                    else {
+                        mListener?.gestureSwipeRight()
+                    }
                 }
                 else if (Math.abs(deltaX) > MIN_DISTANCE || Math.abs(deltaY) > MIN_DISTANCE) {
                     //We do not want to recognize other swipes right now
                 }
                 else if (Math.abs(actionUpTimestamp - actionDownTimestamp) > 500) {
-                   // mListener?.gestureLongPress()
+                    mListener?.gestureLongPress()
                 }
                 else {
                     mListener?.gestureTap()
                 }
+                numberOfFingers = 1 //MUST RESET
             }
         }
         return true
@@ -57,6 +75,9 @@ class SeOnTouchListener(val context : OnSeTouchListenerInterface?) : View.OnTouc
         fun gestureTap()
         fun gestureSwipeUp()
         fun gestureSwipeLeft()
+        fun gestureSwipeRight()
+        fun gestureSwipeLeft2Fingers()
+        fun gestureSwipeRight2Fingers()
         fun gestureLongPress()
     }
 
