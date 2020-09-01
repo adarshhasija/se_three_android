@@ -62,7 +62,7 @@ class StarsEarthApplication : Application() {
             timeMillis = 50
         }
         else if (type == "MC_DASH") {
-            timeMillis = 500
+            timeMillis = 1000
         }
         val v = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
         // Vibrate for 500 milliseconds

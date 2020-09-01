@@ -215,7 +215,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
                 view?.contentDescription = final
                 setMorseCodeText(final)
 
-                val str = "Swipe right with 2 fingers to scroll through the morse code\n\nOR\n\nSwipe left to reset"
+                val str = "Swipe right to scroll through the morse code\n\nOR\n\nSwipe left to reset"
                 tvInstructions?.text = str
                 view?.contentDescription = final + "\n" + str
             }
@@ -232,7 +232,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
                 view?.contentDescription = final
                 setMorseCodeText(final)
 
-                val str = "Swipe right with 2 fingers to scroll through the morse code\n\nOR\n\nSwipe left to reset"
+                val str = "Swipe right to scroll through the morse code\n\nOR\n\nSwipe left to reset"
                 tvInstructions?.text = str
                 view?.contentDescription = final + "\n" + str
             }
@@ -311,8 +311,8 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     }
 
     override fun gestureSwipeRight() {
-        //mMorseCodeIndex++
-        //mcScroll()
+        mMorseCodeIndex++
+        mcScroll()
     }
 
     override fun gestureLongPress() {
