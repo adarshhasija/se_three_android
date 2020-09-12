@@ -256,7 +256,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     override fun gestureSwipeUp() {
         if (tvAlphanumerics?.text?.isEmpty() == true) {
             var currentMorseCodeText = tvMorseCode.text.toString()
-            if (currentMorseCodeText.length == 3) {
+            if (currentMorseCodeText.length >= 3) {
                 (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
                     mContext,
                     "RESULT_SUCCESS"
