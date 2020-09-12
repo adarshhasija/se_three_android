@@ -7,6 +7,10 @@ import android.content.Context
 import android.content.Context.CAMERA_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
@@ -17,15 +21,18 @@ import android.os.Bundle
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.Surface
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.camera.core.*
+import androidx.camera.core.ImageAnalysis.STRATEGY_BLOCK_PRODUCER
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.starsearth.three.application.StarsEarthApplication
+import com.starsearth.two.listeners.SeOnTouchListener
 import kotlinx.android.synthetic.main.activity_camera.*
 import java.io.File
 import java.nio.ByteBuffer
@@ -34,7 +41,7 @@ import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class CameraActivity : AppCompatActivity() {
+class CameraActivity : AppCompatActivity(), SensorEventListener {
 
     private var preview: Preview? = null
     private var imageCapture: ImageCapture? = null
@@ -47,6 +54,7 @@ class CameraActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         supportActionBar?.hide()
 
@@ -54,6 +62,10 @@ class CameraActivity : AppCompatActivity() {
         if (allPermissionsGranted()) {
             (application as? StarsEarthApplication)?.sayThis(tvInstructions?.text?.toString())
             startCamera()
+
+            val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            val sensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+            //sensor?.let { sensorManager.registerListener(this,it,SensorManager.SENSOR_DELAY_NORMAL) } //uncomment this to get calls at onSensorChanged
         } else {
             ActivityCompat.requestPermissions(
                 this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
@@ -90,6 +102,7 @@ class CameraActivity : AppCompatActivity() {
                 .build()
 
             imageAnalyzer = ImageAnalysis.Builder()
+                //.setBackpressureStrategy(STRATEGY_BLOCK_PRODUCER)
                 .build()
                 .also {
                   /*  it.setAnalyzer(cameraExecutor, CameraFeedAnalyzer { forSyntaxSake ->
@@ -125,8 +138,8 @@ class CameraActivity : AppCompatActivity() {
         // Create timestamped output file to hold the image
         val photoFile = File(
             outputDirectory,
-            SimpleDateFormat(FILENAME_FORMAT, Locale.US
-            ).format(System.currentTimeMillis()) + ".jpg")
+            /*SimpleDateFormat(FILENAME_FORMAT, Locale.US
+            ).format(System.currentTimeMillis()) + ".jpg"*/ "se_three.jpg")
 
         // Create output options object which contains file + metadata
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
@@ -185,13 +198,24 @@ class CameraActivity : AppCompatActivity() {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
+
+    override fun onSensorChanged(sensorEvent: SensorEvent?) {
+        Log.d("TAG", "********ON SENSOR CHANGE CALLED*********")
+        Log.d("TAG", "********VALUE 1***********"+sensorEvent?.values?.get(0))
+        Log.d("TAG", "********VALUE 2***********"+sensorEvent?.values?.get(1))
+        Log.d("TAG", "********VALUE 3***********"+sensorEvent?.values?.get(2))
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+
+    }
 }
 
 //We dont actually need a parameter here, but we were not getting the syntax right
 private class CameraFeedAnalyzer (private val activity: Activity) : ImageAnalysis.Analyzer {
 
     private val ORIENTATIONS = SparseIntArray()
-    private lateinit var mActivity: Activity
+    private var mActivity: Activity
 
     init {
         mActivity = activity
@@ -236,6 +260,7 @@ private class CameraFeedAnalyzer (private val activity: Activity) : ImageAnalysi
 
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
+        Log.d("TAG", "********IMAGE ANALYZE FUNCTION CALLED***************")
         val mediaImage = imageProxy.image
     /*    val byteBuffer = imageProxy.planes[0].buffer
         val byteArray = byteBuffer.toByteArray()
@@ -278,10 +303,17 @@ private class CameraFeedAnalyzer (private val activity: Activity) : ImageAnalysi
                 }
                 .addOnFailureListener { e ->
                     // Task failed with an exception
-                    Log.d("TAG", "*******TEXT RECOGNITION FAILED********"+e.message)
+                    //Log.d("TAG", "*******TEXT RECOGNITION FAILED********"+e.message)
+                }
+                .addOnCompleteListener {
+                    //This ensures that the analyzer keeps getting frames. If not, it will only be called once
+                    //Reference: https://stackoverflow.com/questions/56214555/android-mlkit-internal-error-has-occurred-when-executing-firebase-ml-tasks
+                    mediaImage.close()
+                    imageProxy.close()
                 }
 
         }
+
 
     /*    val image = InputImage.fromByteBuffer(
             byteBuffer,

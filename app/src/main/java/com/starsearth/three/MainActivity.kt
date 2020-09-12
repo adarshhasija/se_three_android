@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity(),
     override fun onDoneTapped(finalText: String) {
         val view = this.currentFocus
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0)
+        imm.hideSoftInputFromWindow(view?.getWindowToken(), 0)
 
         supportFragmentManager?.popBackStack()
 
@@ -214,7 +214,7 @@ class MainActivity : AppCompatActivity(),
             if (resultCode == Activity.RESULT_OK) {
                 val extras = data?.extras
                 val cameraText = extras?.getString("text")
-                val actionsFragment = supportFragmentManager?.findFragmentByTag(ActionsFragment.TAG)
+                val actionsFragment = supportFragmentManager.findFragmentByTag(ActionsFragment.TAG)
                 (actionsFragment as? ActionsFragment)?.cameraResultReceived(cameraText)
             }
         }

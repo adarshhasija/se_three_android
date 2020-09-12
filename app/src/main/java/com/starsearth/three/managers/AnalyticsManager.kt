@@ -122,8 +122,9 @@ class AnalyticsManager(private val mContext: Context) {
         logActionEvent("se3_row_selected", bundle)
     }
 
-    fun sendAnalyticsForCameraReturn() {
+    fun sendAnalyticsForCameraReturn(text : String) {
         val bundle = Bundle()
+        bundle.putString("text", text.subSequence(0, if (text.length >= 20) { 20 } else { text.length -1 } ).toString())
         logActionEvent("se3_android_cam_ret", bundle)
     }
 

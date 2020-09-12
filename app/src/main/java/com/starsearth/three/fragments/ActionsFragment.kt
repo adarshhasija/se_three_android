@@ -18,6 +18,8 @@ import com.starsearth.two.listeners.SeOnTouchListener
 import kotlinx.android.synthetic.main.fragment_actions.*
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -70,7 +72,9 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
 
     fun cameraResultReceived(text: String?) {
         if (text?.isEmpty() == false) {
-            (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForCameraReturn()
+            (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForCameraReturn(
+                text
+            )
             (mContext.applicationContext as? StarsEarthApplication)?.sayThis(text)
             (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
                 mContext,
@@ -78,6 +82,15 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
             )
             tvAlphanumerics?.text = text
             tvMorseCode?.text = ""
+        /*    val p: Pattern = Pattern.compile("a-zA-Z0-9 ")
+            val m: Matcher = p.matcher(text)
+            setMorseCodeText(
+                if (m.matches() && text.length <= 6) {
+                    text
+                } else {
+                    ""
+                }
+            )   */
             tvMorseCode?.textSize = 20f
             val str = "Swipe left to reset"
             tvInstructions?.text = str
@@ -147,14 +160,18 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
             currentMorseCodeText += "."
             tvMorseCode?.text = currentMorseCodeText
             val difference = 3 - currentMorseCodeText.length
-            if (difference == 2) {
+            if (currentMorseCodeText.length < 1) {
+                tvInstructions?.text = startingInstruction
+                view?.contentDescription = startingInstruction
+            }
+            else if (currentMorseCodeText.length == 1) {
                 val str = "Swipe up to get TIME" +
                         "\n\n" + "Tap one more time to get DATE" +
                         "\n\n" + "Tap " + difference + " times and swipe up to open camera"
                 tvInstructions?.text = str
                 view?.contentDescription = str
             }
-            else if (difference == 1) {
+            else if (currentMorseCodeText.length == 2) {
                 val str = "Swipe up to get DATE" +
                         "\n\n" + "Tap " + difference + " time and swipe up to open camera"
                 tvInstructions?.text = str
@@ -180,9 +197,9 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
         }
     }
 
-    fun setMorseCodeText(text: String) {
+    fun setMorseCodeText(alphanimeric: String) {
         var mcString = ""
-        for (alphanumeric in text) {
+        for (alphanumeric in alphanimeric) {
             mcString += morseCode.alphabetToMCMap[alphanumeric.toString()] + "|"
         }
         tvMorseCode?.text = mcString
@@ -275,23 +292,27 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
             currentMorseCodeText = currentMorseCodeText.dropLast(1)
             tvMorseCode?.text = currentMorseCodeText
             val difference = 3 - currentMorseCodeText.length
-            if (difference == 2) {
+            if (currentMorseCodeText.length >= 3) {
+                val str = "Swipe up to open camera"
+                tvInstructions?.text = str
+                view?.contentDescription = str
+            }
+            else if (currentMorseCodeText.length == 2) {
+                val str = "Swipe up to get DATE" +
+                        "\n\n" + "Tap " + difference + " time and swipe up to open camera"
+                tvInstructions?.text = str
+                view?.contentDescription = str
+            }
+            else if (currentMorseCodeText.length == 1) {
                 val str = "Swipe up to get TIME" +
                         "\n\n" + "Tap one more time to get DATE" +
                         "\n\n" + "Tap " + difference + " times and swipe up to open camera"
                 tvInstructions?.text = str
                 view?.contentDescription = str
             }
-            else if (difference == 1) {
-                val str = "Swipe up to get DATE" +
-                        "\n\n" + "Tap " + difference + " time and swipe up to open camera"
-                tvInstructions?.text = str
-                view?.contentDescription = str
-            }
             else {
-                val str = "Swipe up to open camera"
-                tvInstructions?.text = str
-                view?.contentDescription = str
+                tvInstructions?.text = startingInstruction
+                view?.contentDescription = startingInstruction
             }
 
          /*   if (difference > 0) {
@@ -333,7 +354,10 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     fun mcScroll() {
         val text = tvMorseCode.text
         if (mMorseCodeIndex < 0 || mMorseCodeIndex >= text.length) {
-            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext, "RESULT_SUCCESS") //Indicates there is nothing more here
+            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
+                mContext,
+                "RESULT_SUCCESS"
+            ) //Indicates there is nothing more here
             return
         }
         val spannable: Spannable = SpannableString(text)
@@ -371,7 +395,10 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
             (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext, "MC_DASH")
         }
         else if (text[mMorseCodeIndex] == '|') {
-            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext, "RESULT_SUCCESS")
+            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
+                mContext,
+                "RESULT_SUCCESS"
+            )
         }
 
         var numberOfPipes = 0
