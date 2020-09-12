@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,11 +21,12 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import java.util.regex.Pattern.matches
 
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
+private const val ARG_ALPHANUMERIC = "param_alphanumeric"
 private const val ARG_PARAM2 = "param2"
 
 /**
@@ -37,7 +39,7 @@ private const val ARG_PARAM2 = "param2"
  */
 class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface {
     // TODO: Rename and change types of parameters
-    private var param1: String? = null
+    private var inputAlphanumeric: String? = null
     private var param2: String? = null
     private lateinit var mContext: Context
     private val morseCode = MorseCode()
@@ -49,7 +51,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
+            inputAlphanumeric = it.getString(ARG_ALPHANUMERIC)?.toUpperCase(Locale.getDefault())
             param2 = it.getString(ARG_PARAM2)
         }
     }
@@ -65,8 +67,50 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tvInstructions?.text = startingInstruction
-        view.contentDescription = startingInstruction
+        if (inputAlphanumeric != null) {
+            tvAlphanumerics?.text = inputAlphanumeric
+            if (inputAlphanumeric!!.length <= 6) {
+                var isRightFormat = true
+                for (char in inputAlphanumeric!!) {
+                    if ((char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9') || char == ' ') {
+
+                    }
+                    else {
+                        isRightFormat = false
+                        break
+                    }
+                }
+
+                setMorseCodeText(
+                    if (isRightFormat) {
+                        inputAlphanumeric!!.replace(" ", "␣").replace("-", "")
+                    }
+                    else {
+                        ""
+                    }
+                )
+                tvMorseCode?.textSize = 20f
+            }
+            else {
+                tvMorseCode?.text = ""
+            }
+
+
+            var instructions = ""
+            if (tvMorseCode?.text.isNullOrBlank() == true) {
+                instructions = "Visually-impaired:\nTap to hear the text"
+            }
+            else {
+                instructions = "Visually-impaired:\nTap to hear the text\n\nDeaf-blind:\nSwipe right to read morse code"
+            }
+            tvInstructions?.text = instructions
+            view.contentDescription = instructions
+        }
+        else {
+            tvInstructions?.text = startingInstruction
+            view.contentDescription = startingInstruction
+        }
+
         view.setOnTouchListener(SeOnTouchListener(this))
     }
 
@@ -127,6 +171,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     interface OnActionsFragmentInteractionListener {
         // TODO: Update argument type and name
         fun openCameraActivity()
+        fun openAction(alphanimeric: String)
     }
 
     companion object {
@@ -141,11 +186,13 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance() = ActionsFragment()
+
+        @JvmStatic
+        fun newInstance(alphanimeric: String?) =
             ActionsFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                    putString(ARG_ALPHANUMERIC, alphanimeric)
                 }
             }
     }
@@ -197,9 +244,9 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
         }
     }
 
-    fun setMorseCodeText(alphanimeric: String) {
+    fun setMorseCodeText(alphanimericStr: String) {
         var mcString = ""
-        for (alphanumeric in alphanimeric) {
+        for (alphanumeric in alphanimericStr) {
             mcString += morseCode.alphabetToMCMap[alphanumeric.toString()] + "|"
         }
         tvMorseCode?.text = mcString
@@ -228,13 +275,14 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
                 val date = calendar[Calendar.DATE]
                 val weekday_name: String = SimpleDateFormat("EEEE", Locale.ENGLISH).format(System.currentTimeMillis())
                 val final = date.toString() + weekday_name.toUpperCase().subSequence(0, 2)
-                tvAlphanumerics?.text = final
+                listener?.openAction(final)
+            /*    tvAlphanumerics?.text = final
                 view?.contentDescription = final
                 setMorseCodeText(final)
 
                 val str = "Swipe right to scroll through the morse code\n\nOR\n\nSwipe left to reset"
                 tvInstructions?.text = str
-                view?.contentDescription = final + "\n" + str
+                view?.contentDescription = final + "\n" + str   */
             }
             else {
                 //TIME
@@ -243,15 +291,22 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
                 )
                 val calendar = Calendar.getInstance()
                 val hr = calendar[Calendar.HOUR_OF_DAY].toString()
-                val min = calendar[Calendar.MINUTE].toString()
+                val min =
+                    if (calendar[Calendar.MINUTE] >= 10) {
+                        calendar[Calendar.MINUTE].toString()
+                    }
+                    else {
+                        "0" + calendar[Calendar.MINUTE]
+                    }
                 val final = hr + min
-                tvAlphanumerics?.text = final
+                listener?.openAction(final)
+            /*    tvAlphanumerics?.text = final
                 view?.contentDescription = final
                 setMorseCodeText(final)
 
                 val str = "Swipe right to scroll through the morse code\n\nOR\n\nSwipe left to reset"
                 tvInstructions?.text = str
-                view?.contentDescription = final + "\n" + str
+                view?.contentDescription = final + "\n" + str   */
             }
 
          /*   val difference = 3 - currentMorseCodeText.length
@@ -277,17 +332,19 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     }
 
     override fun gestureSwipeLeft() {
-        (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext, "RESULT_SUCCESS")
         if (tvAlphanumerics?.text?.isEmpty() == false) {
-            mMorseCodeIndex = -1
+            if (mMorseCodeIndex >= 0) mMorseCodeIndex--
+            mcScroll()
+          /*  mMorseCodeIndex = -1
             tvAlphanumerics?.text = ""
             tvMorseCode?.text = ""
             tvMorseCode?.textSize = 40f
             tvInstructions?.text = startingInstruction
             view?.contentDescription = startingInstruction
-            (mContext.applicationContext as? StarsEarthApplication)?.sayThis(startingInstruction)
+            (mContext.applicationContext as? StarsEarthApplication)?.sayThis(startingInstruction)   */
         }
         else {
+            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext, "RESULT_SUCCESS")
             var currentMorseCodeText = tvMorseCode.text.toString()
             currentMorseCodeText = currentMorseCodeText.dropLast(1)
             tvMorseCode?.text = currentMorseCodeText
@@ -332,23 +389,32 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     }
 
     override fun gestureSwipeRight() {
-        mMorseCodeIndex++
-        mcScroll()
+        //We have to be in reading mode
+        //we have to have morse code text
+        if (inputAlphanumeric != null && tvMorseCode.text.isNullOrBlank() == false) {
+            if (mMorseCodeIndex < tvMorseCode.text.length) mMorseCodeIndex++
+            mcScroll()
+        }
+        else {
+            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
+                mContext,
+                "RESULT_FAILURE"
+            )
+        }
     }
 
     override fun gestureLongPress() {
-        mMorseCodeIndex++
-        mcScroll()
+
     }
 
     override fun gestureSwipeLeft2Fingers() {
-        mMorseCodeIndex--
-        mcScroll()
+        //mMorseCodeIndex--
+        //mcScroll()
     }
 
     override fun gestureSwipeRight2Fingers() {
-        mMorseCodeIndex++
-        mcScroll()
+        //mMorseCodeIndex++
+        //mcScroll()
     }
 
     fun mcScroll() {

@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity(),
         })  */
 
         //val chatModeFragment = ChatModeFragment.newInstance("","")
-        val actionsFragment = ActionsFragment.newInstance("", "")
+        val actionsFragment = ActionsFragment.newInstance()
         getSupportFragmentManager()?.beginTransaction()
             ?.replace(R.id.fragment_container_main, actionsFragment, ActionsFragment.TAG)
             //?.addToBackStack(ActionsFragment.TAG)
@@ -214,8 +214,10 @@ class MainActivity : AppCompatActivity(),
             if (resultCode == Activity.RESULT_OK) {
                 val extras = data?.extras
                 val cameraText = extras?.getString("text")
-                val actionsFragment = supportFragmentManager.findFragmentByTag(ActionsFragment.TAG)
-                (actionsFragment as? ActionsFragment)?.cameraResultReceived(cameraText)
+                //val actionsFragment = supportFragmentManager.findFragmentByTag(ActionsFragment.TAG)
+                //(actionsFragment as? ActionsFragment)?.cameraResultReceived(cameraText)
+                val actionsFragment : Fragment = ActionsFragment.newInstance(cameraText)
+                openNewFragment(actionsFragment, ActionsFragment.TAG)
             }
         }
     }
@@ -249,5 +251,10 @@ class MainActivity : AppCompatActivity(),
     override fun openCameraActivity() {
         val intent = Intent(this, CameraActivity::class.java)
         startActivityForResult(intent, CAMERA_ACTIVITY)
+    }
+
+    override fun openAction(alphanimeric: String) {
+        val actionsFragment : Fragment = ActionsFragment.newInstance(alphanimeric)
+        openNewFragment(actionsFragment, ActionsFragment.TAG)
     }
 }
