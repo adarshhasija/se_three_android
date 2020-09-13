@@ -65,61 +65,66 @@ class AnalyticsManager(private val mContext: Context) {
     fun sendAnalyticsForSaveChatTapped(logSize: Int) {
         val bundle = Bundle()
         bundle.putInt("log_size", logSize)
-        logActionEvent("se3_save_chat_tapped", bundle)
+        logActionEvent("se3_android_save_chat_tap", bundle)
     }
 
     fun sendAnalyticsForClearChatTapped(logSize: Int) {
         val bundle = Bundle()
         bundle.putInt("log_size", logSize)
-        logActionEvent("se3_clear_chat_tapped", bundle)
+        logActionEvent("se3_android_clear_chat_tap", bundle)
     }
 
     fun sendAnalyticsForClearChatYesTapped(logSize: Int) {
         val bundle = Bundle()
         bundle.putInt("log_size", logSize)
-        logActionEvent("se3_clear_chat_yes", bundle)
+        logActionEvent("se3_android_clear_chat_y", bundle)
     }
 
     fun sendAnalyticsForTalkTapped() {
         val bundle = Bundle()
-        logActionEvent("se3_talk_tapped", bundle)
+        logActionEvent("se3_android_talk_tap", bundle)
+    }
+
+    fun sendAnalyticsForTalkScreenOpened() {
+        val bundle = Bundle()
+        logActionEvent("se3_android_talk_open", bundle)
     }
 
     fun sendAnalyticsForTypeTapped() {
         val bundle = Bundle()
-        logActionEvent("se3_typing_tapped", bundle)
+        logActionEvent("se3_android_typing_tap", bundle)
     }
 
     fun sendAnalyticsTypingDoneTapped() {
         val bundle = Bundle()
-        logActionEvent("se3_typing_done_tapped", bundle)
+        logActionEvent("se3_android_typing_done_tap", bundle)
     }
 
     fun sendAnalyticsTypingTickTapped() {
         val bundle = Bundle()
-        logActionEvent("se3_typing_tick_tapped", bundle)
+        logActionEvent("se3_android_typing_tick_tap", bundle)
     }
 
     fun sendAnalyticsForTypingCancelled(reason : String) {
         val bundle = Bundle()
         bundle.putString("reason", reason)
-        logActionEvent("se3_typing_cancelled", bundle)
+        logActionEvent("se3_android_typing_cancel", bundle)
     }
 
     fun sendAnalyticsForTalkingCancelled(reason : String) {
         val bundle = Bundle()
         bundle.putString("reason", reason)
-        logActionEvent("se3_talking_cancelled", bundle)
+        logActionEvent("se3_android_talking_cancel", bundle)
     }
 
     fun sendAnalyticsForTimerFinished() {
         val bundle = Bundle()
-        logActionEvent("se3_timer_finished", bundle)
+        logActionEvent("se3_android_timer_finish", bundle)
     }
 
     fun sendAnalyticsForRowSelection() {
         val bundle = Bundle()
-        logActionEvent("se3_row_selected", bundle)
+        logActionEvent("se3_android_row_selected", bundle)
     }
 
     fun sendAnalyticsForCameraReturn(text : String) {

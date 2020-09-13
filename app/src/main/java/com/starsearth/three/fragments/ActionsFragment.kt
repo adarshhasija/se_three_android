@@ -7,9 +7,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.starsearth.three.R
@@ -54,6 +52,8 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
             inputAlphanumeric = it.getString(ARG_ALPHANUMERIC)?.toUpperCase(Locale.getDefault())
             param2 = it.getString(ARG_PARAM2)
         }
+
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -172,6 +172,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
         // TODO: Update argument type and name
         fun openCameraActivity()
         fun openAction(alphanimeric: String)
+        fun openFromActionScreen(screen: String)
     }
 
     companion object {
@@ -503,5 +504,25 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
 
 
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        //super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_actions, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        val id = item.itemId
+
+
+        if (id == R.id.action_deaf) {
+            listener?.openFromActionScreen("CHAT_MODE")
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 }

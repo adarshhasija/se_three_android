@@ -80,6 +80,7 @@ class ChatModeFragment : Fragment() {
             if (colorId == Color.BLUE) {
                 context?.let {
                     if (isNetworkAvailable(it)) {
+                        (activity?.application as StarsEarthApplication)?.analyticsManager?.sendAnalyticsForTalkScreenOpened()
                         listener?.onTalkButtonTapped()
                         return@setOnClickListener
                     }

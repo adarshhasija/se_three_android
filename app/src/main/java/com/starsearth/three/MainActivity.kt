@@ -257,4 +257,9 @@ class MainActivity : AppCompatActivity(),
         val actionsFragment : Fragment = ActionsFragment.newInstance(alphanimeric)
         openNewFragment(actionsFragment, ActionsFragment.TAG)
     }
+
+    override fun openFromActionScreen(screen: String) {
+        val chatModeFragment = ChatModeFragment.newInstance("","")
+        openNewFragment(chatModeFragment, ChatModeFragment.TAG)
+    }
 }
