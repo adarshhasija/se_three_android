@@ -65,77 +65,77 @@ class AnalyticsManager(private val mContext: Context) {
     fun sendAnalyticsForSaveChatTapped(logSize: Int) {
         val bundle = Bundle()
         bundle.putInt("log_size", logSize)
-        logActionEvent("se3_android_save_chat_tap", bundle)
+        logActionEvent("se3_aos_save_chat_tap", bundle)
     }
 
     fun sendAnalyticsForClearChatTapped(logSize: Int) {
         val bundle = Bundle()
         bundle.putInt("log_size", logSize)
-        logActionEvent("se3_android_clear_chat_tap", bundle)
+        logActionEvent("se3_aos_clear_chat_tap", bundle)
     }
 
     fun sendAnalyticsForClearChatYesTapped(logSize: Int) {
         val bundle = Bundle()
         bundle.putInt("log_size", logSize)
-        logActionEvent("se3_android_clear_chat_y", bundle)
+        logActionEvent("se3_aos_clear_chat_y", bundle)
     }
 
     fun sendAnalyticsForTalkTapped() {
         val bundle = Bundle()
-        logActionEvent("se3_android_talk_tap", bundle)
+        logActionEvent("se3_aos_talk_tap", bundle)
     }
 
     fun sendAnalyticsForTalkScreenOpened() {
         val bundle = Bundle()
-        logActionEvent("se3_android_talk_open", bundle)
+        logActionEvent("se3_aos_talk_open", bundle)
     }
 
     fun sendAnalyticsForTypeTapped() {
         val bundle = Bundle()
-        logActionEvent("se3_android_typing_tap", bundle)
+        logActionEvent("se3_aos_typing_tap", bundle)
     }
 
     fun sendAnalyticsTypingDoneTapped() {
         val bundle = Bundle()
-        logActionEvent("se3_android_typing_done_tap", bundle)
+        logActionEvent("se3_aos_typing_done_tap", bundle)
     }
 
     fun sendAnalyticsTypingTickTapped() {
         val bundle = Bundle()
-        logActionEvent("se3_android_typing_tick_tap", bundle)
+        logActionEvent("se3_aos_typing_tick_tap", bundle)
     }
 
     fun sendAnalyticsForTypingCancelled(reason : String) {
         val bundle = Bundle()
         bundle.putString("reason", reason)
-        logActionEvent("se3_android_typing_cancel", bundle)
+        logActionEvent("se3_aos_typing_cancel", bundle)
     }
 
     fun sendAnalyticsForTalkingCancelled(reason : String) {
         val bundle = Bundle()
         bundle.putString("reason", reason)
-        logActionEvent("se3_android_talking_cancel", bundle)
+        logActionEvent("se3_aos_talking_cancel", bundle)
     }
 
     fun sendAnalyticsForTimerFinished() {
         val bundle = Bundle()
-        logActionEvent("se3_android_timer_finish", bundle)
+        logActionEvent("se3_aos_timer_finish", bundle)
     }
 
     fun sendAnalyticsForRowSelection() {
         val bundle = Bundle()
-        logActionEvent("se3_android_row_selected", bundle)
+        logActionEvent("se3_aos_row_selected", bundle)
     }
 
     fun sendAnalyticsForCameraReturn(text : String) {
         val bundle = Bundle()
         bundle.putString("text", text.subSequence(0, if (text.length >= 20) { 20 } else { text.length -1 } ).toString())
-        logActionEvent("se3_android_cam_ret", bundle)
+        logActionEvent("se3_aos_cam_ret", bundle)
     }
 
     fun sendAnalyticsForAction(action: String) {
         val bundle = Bundle()
         bundle.putString("state", action)
-        logActionEvent("se3_android_swipe_up", bundle)
+        logActionEvent("se3_aos_swipe_up", bundle)
     }
 }
