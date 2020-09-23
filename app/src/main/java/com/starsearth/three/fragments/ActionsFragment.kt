@@ -53,7 +53,11 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
             param2 = it.getString(ARG_PARAM2)
         }
 
-        setHasOptionsMenu(true)
+        if (inputAlphanumeric == null) {
+            //Only if it is the first fragment, with no input action, do we set the menu
+            setHasOptionsMenu(true)
+        }
+
     }
 
     override fun onCreateView(
@@ -101,7 +105,12 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
                 instructions = "Visually-impaired:\nTap to hear the text"
             }
             else {
-                instructions = "Visually-impaired:\nTap to hear the text\n\nDeaf-blind:\nSwipe right to read morse code"
+                instructions = "Visually-impaired:\nTap to hear the text\n\n" +
+                        "Deaf-blind:\n" +
+                        "Swipe right to read morse code and get the TIME from the pattern of vibrations\n" +
+                        "Short vibration means dot\n" +
+                        "Long vibration means dash\n" +
+                        "2 short vibrations means end of character"
             }
             tvInstructions?.text = instructions
             view.contentDescription = instructions

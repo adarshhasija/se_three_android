@@ -4,10 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import com.starsearth.three.fragments.ChatModeFragment
-import com.starsearth.three.fragments.TypingFragment
 import android.view.inputmethod.InputMethodManager
-import com.starsearth.three.fragments.TalkingFragment
 import android.content.DialogInterface
 import android.content.Intent
 import com.starsearth.three.domain.ChatListItem
@@ -26,7 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
 import androidx.fragment.app.Fragment
 import com.starsearth.three.application.StarsEarthApplication
-import com.starsearth.three.fragments.ActionsFragment
+import com.starsearth.three.fragments.*
 import com.starsearth.three.managers.AnalyticsManager
 import kotlinx.android.synthetic.main.fragment_chat_mode.*
 
@@ -36,6 +33,7 @@ class MainActivity : AppCompatActivity(),
                     TalkingFragment.OnFragmentInteractionListener,
                     ChatListItemFragment.OnChatListFragmentInteractionListener,
                     ActionsFragment.OnActionsFragmentInteractionListener,
+                    ActionFragment.OnActionFragmentInteractionListener,
                     TypingFragment.OnTypingFragmentInteractionListener {
 
     override fun checkPermissionsForSpeechToText() {
@@ -146,9 +144,9 @@ class MainActivity : AppCompatActivity(),
         })  */
 
         //val chatModeFragment = ChatModeFragment.newInstance("","")
-        val actionsFragment = ActionsFragment.newInstance()
+        val actionFragment = ActionFragment.newInstance()
         getSupportFragmentManager()?.beginTransaction()
-            ?.replace(R.id.fragment_container_main, actionsFragment, ActionsFragment.TAG)
+            ?.replace(R.id.fragment_container_main, actionFragment, ActionFragment.TAG)
             //?.addToBackStack(ActionsFragment.TAG)
             ?.commit()
     }
@@ -259,7 +257,23 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun openFromActionScreen(screen: String) {
+        //Currently only being used to open chat mode
         val chatModeFragment = ChatModeFragment.newInstance("","")
         openNewFragment(chatModeFragment, ChatModeFragment.TAG)
+    }
+
+    override fun openActionFromActionScreen(action: String) {
+        if (action == "TIME" || action == "DATE") {
+            val actionFragment = ActionFragment.newInstance(action)
+            openNewFragment(actionFragment, ActionFragment.TAG)
+        }
+        else if (action == "CAMERA") {
+            val intent = Intent(this, CameraActivity::class.java)
+            startActivityForResult(intent, CAMERA_ACTIVITY)
+        }
+        else if (action == "CHAT_MODE") {
+            val chatModeFragment = ChatModeFragment.newInstance("","")
+            openNewFragment(chatModeFragment, ChatModeFragment.TAG)
+        }
     }
 }

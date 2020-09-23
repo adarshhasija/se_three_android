@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+            android:id="@+id/action_time"
+            android:title="Time in Morse Code for Deaf-Blind"
+            android:orderInCategory="10"
+            app:showAsAction="never" />
+
+    <item
+            android:id="@+id/action_date"
+            android:title="Date in Morse Code for Deaf-Blind"
+            android:orderInCategory="10"
+            app:showAsAction="never" />
+
+    <item
+            android:id="@+id/action_deaf"
+            android:title="Chat Mode for Deaf"
+            android:orderInCategory="10"
+            app:showAsAction="never" />
+
+</menu>
