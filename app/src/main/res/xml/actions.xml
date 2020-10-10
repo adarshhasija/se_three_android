@@ -1,0 +1,15 @@
+<?xml version ="1.0" encoding ="utf-8"?><!--  Learn More about how to use App Actions: https://developer.android.com/guide/actions/index.html -->
+<actions>
+    <action intentName="actions.intent.GET_THING">
+        <fulfillment urlTemplate="https://three.starsearth.com/find{?name}">
+            <parameter-mapping
+                    intentParameter="thing.name"
+                    urlParameter="name"
+                    required="true" />
+        </fulfillment>
+
+        <!-- Provide a fallback fulfillment with no required parameters. For example, to your app search or router deeplink -->
+        <fulfillment urlTemplate="https://three.starsearth.com" />
+
+    </action>
+</actions>

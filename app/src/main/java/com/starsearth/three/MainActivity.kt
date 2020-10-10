@@ -15,9 +15,8 @@ import android.speech.tts.TextToSpeech
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.AudioManager
+import android.net.Uri
 import android.os.Build
-import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
@@ -149,6 +148,8 @@ class MainActivity : AppCompatActivity(),
             ?.replace(R.id.fragment_container_main, actionFragment, ActionFragment.TAG)
             //?.addToBackStack(ActionsFragment.TAG)
             ?.commit()
+
+        this.intent?.handleIntent()
     }
 
     override fun onPause() {
@@ -274,6 +275,39 @@ class MainActivity : AppCompatActivity(),
         else if (action == "CHAT_MODE") {
             val chatModeFragment = ChatModeFragment.newInstance("","")
             openNewFragment(chatModeFragment, ChatModeFragment.TAG)
+        }
+    }
+
+    private fun handleDeepLink(data: Uri?) {
+        when (data?.path) {
+            DeepLink.FIND -> {
+                // Get the parameter defined as "exerciseType" and add it to the fragment arguments
+             /*   val exerciseType = data.getQueryParameter(DeepLink.Params.ACTIVITY_TYPE).orEmpty()
+                val type = FitActivity.Type.find(exerciseType)
+                val arguments = Bundle().apply {
+                    putSerializable(FitTrackingFragment.PARAM_TYPE, type)
+                }
+                updateView(FitTrackingFragment::class.java, arguments)  */
+                openCameraActivity()
+            }
+            DeepLink.STOP -> {
+                // Stop the tracking service if any and return to home screen.
+              /*  stopService(Intent(this, FitTrackingService::class.java))
+                updateView(FitStatsFragment::class.java)    */
+            }
+            else -> {
+                // Path is not supported or invalid, start normal flow.
+                //showDefaultView()
+            }
+        }
+    }
+
+    private fun Intent.handleIntent() {
+        when (action) {
+            // When the action is triggered by a deep-link, Intent.ACTION_VIEW will be used
+            Intent.ACTION_VIEW -> handleDeepLink(data)
+            // Otherwise start the app as you would normally do.
+            //else -> showDefaultView()
         }
     }
 }
