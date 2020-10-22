@@ -12,12 +12,10 @@ import androidx.fragment.app.Fragment
 import com.starsearth.three.R
 import com.starsearth.three.application.StarsEarthApplication
 import com.starsearth.three.domain.MorseCode
+import com.starsearth.three.utils.CustomVibrationPatternsUtils
 import com.starsearth.two.listeners.SeOnTouchListener
 import kotlinx.android.synthetic.main.fragment_action.*
-import kotlinx.android.synthetic.main.fragment_action.tvAlphanumerics
-import kotlinx.android.synthetic.main.fragment_action.tvInstructions
-import kotlinx.android.synthetic.main.fragment_action.tvMorseCode
-import kotlinx.android.synthetic.main.fragment_actions.*
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -68,21 +66,17 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_TIME"
             )
-            val calendar = Calendar.getInstance()
-            val hr = calendar[Calendar.HOUR_OF_DAY].toString()
-            val min =
-                if (calendar[Calendar.MINUTE] >= 10) {
-                    calendar[Calendar.MINUTE].toString()
-                }
-                else {
-                    "0" + calendar[Calendar.MINUTE]
-                }
-            val final = hr + min
-            tvAlphanumerics?.text = final
-            setMorseCodeText(final)
-            val instruction = "We give time in 24 hr format\n\nVisually-impaired:\n" + "Tap to hear the text\n\nDeaf-blind:\nSwipe right to read morse code and get the TIME from the pattern of vibrations\nShort vibration means dot\nLong vibration means dash\n2 short vibrations mean end of character"
+            val dateFormat: DateFormat = SimpleDateFormat("hh:mm aa")
+            val dateString: String = dateFormat.format(Date()).toString()
+            tvAlphanumerics?.text = dateString
+            tvMorseCode?.text = CustomVibrationPatternsUtils.getCurrentTimeInDotsDashes()
+            val instruction = "Visually-impaired:\n" + "Tap to hear the text.\n\nDeaf-blind:\nSwipe right to feel the pattern of vibrations"
             tvInstructions?.text = instruction
-            view.contentDescription = instruction
+            val explanation = "Explanation:\n3 sets of characters.\nSet 1 is hours.\nLong vibration = 1 dash = 5 hours.\nShort vibration = 1 dot = 1 hour.\nEx: 1 long vibration and 1 short vibration = 6." +
+                                "\nSet 2 is minutes.\nLong vibration = 1 dash = 5 minutes.\nShort vibration = 2 dot = 1 minute.\nEx: 1 long vibration and 1 short vibration = 6 mins." +
+                                "\nSet 3 is APM and PM.\nLong vibration = dash = PM.\nShort vibration = dot = AM"
+            tvMCExplanation?.text = explanation
+            //view.contentDescription = instruction
         }
         else if (mInputAction == "DATE") {
             //DATE
@@ -92,17 +86,22 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             val calendar = Calendar.getInstance()
             val date = calendar[Calendar.DATE]
             val weekday_name: String = SimpleDateFormat("EEEE", Locale.ENGLISH).format(System.currentTimeMillis())
-            val final = date.toString() + weekday_name.toUpperCase().subSequence(0, 2)
+            //val final = date.toString() + weekday_name.toUpperCase().subSequence(0, 2)
+            val final = date.toString() + " " + weekday_name.toUpperCase()
             tvAlphanumerics?.text = final
-            setMorseCodeText(final)
-            val instruction = "We only give the date and day of the week\n\nVisually-impaired:\n" + "Tap to hear the text\n\nDeaf-blind:\nSwipe right to read morse code and get the DATE from the pattern of vibrations\nShort vibration means dot\nLong vibration means dash\n2 short vibrations mean end of character"
+            tvMorseCode?.text = CustomVibrationPatternsUtils.getDateAndDayInDotsDashes()
+            val instruction = "Visually-impaired:\n" + "Tap to hear the text\n\nDeaf-blind:\nSwipe right to feel the pattern of vibrations"
             tvInstructions?.text = instruction
-            view.contentDescription = instruction
+            val explanation = "Explanation:\n2 Sets of characters." +
+                                "\nSet 1 is the date.\nLong vibration = 1 Dash = 5 days.\nShort vibration = 1 Dot = 1 day.\nEx: 1 long vibration and 1 short vibration = 6th." +
+                                "\nSet 2 is the day of the week since Sunday.\nShort vibration = 1 Dot = day since Sunday.\nEx: 2 short vibrations = Monday"
+            tvMCExplanation?.text = explanation
+            //view.contentDescription = instruction
         }
         else {
             val instruction = "Are you trying to read the text on a door?\nSwipe up to open camera"
             tvInstructions?.text = instruction
-            view.contentDescription = instruction
+            //view.contentDescription = instruction
         }
 
         view.setOnTouchListener(SeOnTouchListener(this))
@@ -208,6 +207,12 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
                 mContext,
                 "RESULT_SUCCESS"
             )
+        }
+
+        //Highlighting alphanumeric portion
+        if (mInputAction == "TIME" || mInputAction == "DATE") {
+            //If its TIME or DATE, it is custom vibrations. No need to highlight alphanumerics
+            return
         }
 
         var numberOfPipes = 0

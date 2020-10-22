@@ -107,17 +107,17 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
             else {
                 instructions = "Visually-impaired:\nTap to hear the text\n\n" +
                         "Deaf-blind:\n" +
-                        "Swipe right to read morse code and get the TIME from the pattern of vibrations\n" +
-                        "Short vibration means dot\n" +
-                        "Long vibration means dash\n" +
-                        "2 short vibrations means end of character"
+                        "Swipe right to read morse code.\n" +
+                        "Short vibration means dot.\n" +
+                        "Long vibration means dash.\n" +
+                        "2 short vibrations means end of character."
             }
             tvInstructions?.text = instructions
-            view.contentDescription = instructions
+            //view.contentDescription = instructions
         }
         else {
             tvInstructions?.text = startingInstruction
-            view.contentDescription = startingInstruction
+            //view.contentDescription = startingInstruction
         }
 
         view.setOnTouchListener(SeOnTouchListener(this))

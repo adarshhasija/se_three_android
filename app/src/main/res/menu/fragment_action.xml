@@ -4,13 +4,13 @@
 
     <item
             android:id="@+id/action_time"
-            android:title="Time in Morse Code for Deaf-Blind"
+            android:title="Time for Deaf-Blind"
             android:orderInCategory="10"
             app:showAsAction="never" />
 
     <item
             android:id="@+id/action_date"
-            android:title="Date in Morse Code for Deaf-Blind"
+            android:title="Date and Day of Week for Deaf-Blind"
             android:orderInCategory="10"
             app:showAsAction="never" />
 
