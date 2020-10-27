@@ -23,7 +23,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
 import androidx.fragment.app.Fragment
 import com.starsearth.three.application.StarsEarthApplication
+import com.starsearth.three.domain.Action
 import com.starsearth.three.fragments.*
+import com.starsearth.three.fragments.lists.ActionListFragment
 import com.starsearth.three.managers.AnalyticsManager
 import kotlinx.android.synthetic.main.fragment_chat_mode.*
 
@@ -34,6 +36,7 @@ class MainActivity : AppCompatActivity(),
                     ChatListItemFragment.OnChatListFragmentInteractionListener,
                     ActionsFragment.OnActionsFragmentInteractionListener,
                     ActionFragment.OnActionFragmentInteractionListener,
+                    ActionListFragment.OnActionListFragmentInteractionListener,
                     TypingFragment.OnTypingFragmentInteractionListener {
 
     override fun checkPermissionsForSpeechToText() {
@@ -144,9 +147,10 @@ class MainActivity : AppCompatActivity(),
         })  */
 
         //val chatModeFragment = ChatModeFragment.newInstance("","")
-        val actionFragment = ActionFragment.newInstance()
+        //val actionFragment = ActionFragment.newInstance()
+        val actionListFragment = ActionListFragment.newInstance()
         getSupportFragmentManager()?.beginTransaction()
-            ?.replace(R.id.fragment_container_main, actionFragment, ActionFragment.TAG)
+            ?.replace(R.id.fragment_container_main, actionListFragment, ActionListFragment.TAG)
             //?.addToBackStack(ActionsFragment.TAG)
             ?.commit()
     }
@@ -275,5 +279,18 @@ class MainActivity : AppCompatActivity(),
             val chatModeFragment = ChatModeFragment.newInstance("","")
             openNewFragment(chatModeFragment, ChatModeFragment.TAG)
         }
+    }
+
+    override fun onActionListItemInteraction(action: Action) {
+        if (action.rowType == Action.Companion.ROW_TYPE.CAMERA_OCR) {
+            (application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
+                "action_CAMERA_OCR"
+            )
+            openCameraActivity()
+        }
+    }
+
+    override fun openActionFromActionsListScreen(action: String) {
+        openActionFromActionScreen(action) //using this function as it already exists. If the ActionFragment gets deleted, move the logic from 'openActionFromActionsScreen' to heres
     }
 }
