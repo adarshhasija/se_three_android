@@ -24,7 +24,7 @@ class CustomVibrationPatternsUtils {
             val minsDashes = mins/5
             val minDots = mins - (minsDashes*5)
             val amPm =
-                if (calendar[Calendar.HOUR_OF_DAY] > 12) {
+                if (calendar[Calendar.HOUR_OF_DAY] >= 12) {
                     "PM"
                 }
                 else {
@@ -81,6 +81,7 @@ class CustomVibrationPatternsUtils {
                 finalString += "."
                 i++
             }
+            finalString += "|"
             return finalString
         }
     }
