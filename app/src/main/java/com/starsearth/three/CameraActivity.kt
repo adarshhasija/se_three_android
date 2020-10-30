@@ -30,8 +30,13 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.objects.ObjectDetection
+import com.google.mlkit.vision.objects.ObjectDetector
+import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
+import com.google.mlkit.vision.objects.defaults.PredefinedCategory
 import com.google.mlkit.vision.text.TextRecognition
 import com.starsearth.three.application.StarsEarthApplication
+import com.starsearth.three.domain.Action
 import com.starsearth.two.listeners.SeOnTouchListener
 import kotlinx.android.synthetic.main.activity_camera.*
 import java.io.File
@@ -47,6 +52,8 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
     private var imageCapture: ImageCapture? = null
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
+    private var mRowType : Action.Companion.ROW_TYPE? = null
+    private var mObjectDetector : ObjectDetector? = null
 
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
@@ -55,6 +62,22 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        intent.extras?.let {
+            mRowType = it.get(Action.Companion.ROW_TYPE.ROW_TYPE_KEY.toString()) as? Action.Companion.ROW_TYPE
+            if (mRowType == Action.Companion.ROW_TYPE.CAMERA_OCR) {
+                tvInstructions?.text = "Point your camera at the door\nWe will tell you the text"
+            }
+            else if (mRowType == Action.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION) {
+                // Live detection and tracking
+                val options = ObjectDetectorOptions.Builder()
+                    .setDetectorMode(ObjectDetectorOptions.STREAM_MODE)
+                    .enableClassification()  // Optional
+                    .build()
+                mObjectDetector = ObjectDetection.getClient(options)
+                tvInstructions?.text = "Point your camera around you"
+            }
+        }
 
         supportActionBar?.hide()
 
@@ -108,7 +131,7 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
                   /*  it.setAnalyzer(cameraExecutor, CameraFeedAnalyzer { forSyntaxSake ->
                         //Log.d(TAG, "Average luminosity: $luma")
                     })  */
-                    it.setAnalyzer(cameraExecutor, CameraFeedAnalyzer (this))
+                    it.setAnalyzer(cameraExecutor, CameraFeedAnalyzer (this, mRowType, mObjectDetector))
                 }
 
             // Select back camera
@@ -212,13 +235,17 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
 }
 
 //We dont actually need a parameter here, but we were not getting the syntax right
-private class CameraFeedAnalyzer (private val activity: Activity) : ImageAnalysis.Analyzer {
+private class CameraFeedAnalyzer (private val activity: Activity, private val rowType: Action.Companion.ROW_TYPE?, objectDetector: ObjectDetector?) : ImageAnalysis.Analyzer {
 
     private val ORIENTATIONS = SparseIntArray()
     private var mActivity: Activity
+    private var mRowType: Action.Companion.ROW_TYPE?
+    private var mObjectDetector : ObjectDetector?
 
     init {
         mActivity = activity
+        mRowType = rowType
+        mObjectDetector = objectDetector
         ORIENTATIONS.append(Surface.ROTATION_0, 90)
         ORIENTATIONS.append(Surface.ROTATION_90, 0)
         ORIENTATIONS.append(Surface.ROTATION_180, 270)
@@ -260,7 +287,6 @@ private class CameraFeedAnalyzer (private val activity: Activity) : ImageAnalysi
 
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
-        Log.d("TAG", "********IMAGE ANALYZE FUNCTION CALLED***************")
         val mediaImage = imageProxy.image
     /*    val byteBuffer = imageProxy.planes[0].buffer
         val byteArray = byteBuffer.toByteArray()
@@ -270,47 +296,83 @@ private class CameraFeedAnalyzer (private val activity: Activity) : ImageAnalysi
 
         if (mediaImage != null) {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+            if (rowType == Action.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION) {
+                mObjectDetector?.process(image)
+                    ?.addOnSuccessListener { detectedObjects ->
+                        Log.d(rowType.toString(), "*******SUCCESS***********"+detectedObjects.size)
+                        for (detectedObject in detectedObjects) {
+                            val boundingBox = detectedObject.boundingBox
+                            val trackingId = detectedObject.trackingId
+                            for (label in detectedObject.labels) {
+                                val text = label.text
+                                Toast.makeText(mActivity, text,
+                                    Toast.LENGTH_LONG).show()
+                                (mActivity?.application as? StarsEarthApplication)?.sayThis(text)
+                                if (PredefinedCategory.FOOD == text) {
 
-            // Pass image to an ML Kit Vision API
-            val recognizer = TextRecognition.getClient()
-            val result = recognizer.process(image)
-                .addOnSuccessListener { visionText ->
-                    // Task completed successfully
-                    val txt = visionText.text
-                    for (block in visionText.textBlocks) {
-                        val blockText = block.text
-                        val blockCornerPoints = block.cornerPoints
-                        val blockFrame = block.boundingBox
-                        for (line in block.lines) {
-                            val lineText = line.text
-                            val lineCornerPoints = line.cornerPoints
-                            val lineFrame = line.boundingBox
-                            for (element in line.elements) {
-                                val elementText = element.text
-                                val elementCornerPoints = element.cornerPoints
-                                val elementFrame = element.boundingBox
+                                }
+                                val index = label.index
+                                if (PredefinedCategory.FOOD_INDEX == index) {
+
+                                }
+                                val confidence = label.confidence
                             }
                         }
                     }
-                    if (txt.isBlank() == false) {
-                        val bundle = Bundle()
-                        bundle.putString("text", txt)
-                        val intent = Intent()
-                        intent.putExtras(bundle)
-                        mActivity.setResult(Activity.RESULT_OK, intent)
-                        mActivity.finish()
+                    ?.addOnFailureListener { e ->
+                        Log.d("TAG", "*******FAILED WITH ERROR: " + e.message)
+                        Toast.makeText(mActivity, "ERROR: "+e.message,
+                            Toast.LENGTH_LONG).show()
                     }
-                }
-                .addOnFailureListener { e ->
-                    // Task failed with an exception
-                    //Log.d("TAG", "*******TEXT RECOGNITION FAILED********"+e.message)
-                }
-                .addOnCompleteListener {
-                    //This ensures that the analyzer keeps getting frames. If not, it will only be called once
-                    //Reference: https://stackoverflow.com/questions/56214555/android-mlkit-internal-error-has-occurred-when-executing-firebase-ml-tasks
-                    mediaImage.close()
-                    imageProxy.close()
-                }
+                    ?.addOnCompleteListener {
+                        mediaImage.close()
+                        imageProxy.close()
+                    }
+            }
+            else {
+                // Pass image to an ML Kit Vision API
+                val recognizer = TextRecognition.getClient()
+                val result = recognizer.process(image)
+                    .addOnSuccessListener { visionText ->
+                        // Task completed successfully
+                        Log.d("TAG", "*********SUCCESSFULLY CREATED********")
+                        val txt = visionText.text
+                        for (block in visionText.textBlocks) {
+                            val blockText = block.text
+                            val blockCornerPoints = block.cornerPoints
+                            val blockFrame = block.boundingBox
+                            for (line in block.lines) {
+                                val lineText = line.text
+                                val lineCornerPoints = line.cornerPoints
+                                val lineFrame = line.boundingBox
+                                for (element in line.elements) {
+                                    val elementText = element.text
+                                    val elementCornerPoints = element.cornerPoints
+                                    val elementFrame = element.boundingBox
+                                }
+                            }
+                        }
+                        if (txt.isBlank() == false) {
+                            val bundle = Bundle()
+                            bundle.putString("text", txt)
+                            val intent = Intent()
+                            intent.putExtras(bundle)
+                            mActivity.setResult(Activity.RESULT_OK, intent)
+                            mActivity.finish()
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        // Task failed with an exception
+                        Log.d("TAG", "*******TEXT RECOGNITION FAILED********"+e.message)
+                    }
+                    .addOnCompleteListener {
+                        //This ensures that the analyzer keeps getting frames. If not, it will only be called once
+                        //Reference: https://stackoverflow.com/questions/56214555/android-mlkit-internal-error-has-occurred-when-executing-firebase-ml-tasks
+                        mediaImage.close()
+                        imageProxy.close()
+                    }
+            }
+
 
         }
 

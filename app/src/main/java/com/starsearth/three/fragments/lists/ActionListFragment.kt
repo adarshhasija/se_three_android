@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.DividerItemDecoration
+import com.starsearth.three.BuildConfig
 import com.starsearth.three.R
 import com.starsearth.three.adapter.MyActionRecyclerViewAdapter
 import com.starsearth.three.domain.Action
@@ -54,6 +55,11 @@ class ActionListFragment : Fragment() {
                 val actionList = ArrayList<Action>()
                 val action1 = Action("Text from Camera", "Are you trying to read the text on a door? Use this option to open the camera", Action.Companion.ROW_TYPE.CAMERA_OCR)
                 actionList.add(action1)
+                if (BuildConfig.DEBUG) {
+                    //Only for internal testing right now
+                    var action2 = Action("Search with Camera", "Are you trying to find something? Use this option", Action.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION)
+                    actionList.add(action2)
+                }
                 adapter = MyActionRecyclerViewAdapter(actionList, mContext, mListener)
             }
         }

@@ -218,6 +218,11 @@ class MainActivity : AppCompatActivity(),
                 val cameraText = extras?.getString("text")
                 //val actionsFragment = supportFragmentManager.findFragmentByTag(ActionsFragment.TAG)
                 //(actionsFragment as? ActionsFragment)?.cameraResultReceived(cameraText)
+                (applicationContext as? StarsEarthApplication)?.sayThis(cameraText)
+                (applicationContext as? StarsEarthApplication)?.vibrate(
+                    this,
+                    "RESULT_SUCCESS"
+                )
                 val actionsFragment : Fragment = ActionsFragment.newInstance(cameraText)
                 openNewFragment(actionsFragment, ActionsFragment.TAG)
             }
@@ -255,6 +260,14 @@ class MainActivity : AppCompatActivity(),
         startActivityForResult(intent, CAMERA_ACTIVITY)
     }
 
+    fun openCameraActivityFromActionsList(mode: Action.Companion.ROW_TYPE) {
+        val bundle = Bundle()
+        bundle.putSerializable(Action.Companion.ROW_TYPE.ROW_TYPE_KEY.toString(), mode)
+        val intent = Intent(this, CameraActivity::class.java)
+        intent.putExtras(bundle)
+        startActivityForResult(intent, CAMERA_ACTIVITY)
+    }
+
     override fun openAction(alphanimeric: String) {
         val actionsFragment : Fragment = ActionsFragment.newInstance(alphanimeric)
         openNewFragment(actionsFragment, ActionsFragment.TAG)
@@ -286,8 +299,8 @@ class MainActivity : AppCompatActivity(),
             (application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_CAMERA_OCR"
             )
-            openCameraActivity()
         }
+        openCameraActivityFromActionsList(action.rowType)
     }
 
     override fun openActionFromActionsListScreen(action: String) {

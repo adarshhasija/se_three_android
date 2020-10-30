@@ -2,9 +2,9 @@ package com.starsearth.three.domain
 
 class Action {
 
-    lateinit var title : String
+    var title : String
     var description : String? = null
-    lateinit var rowType : ROW_TYPE
+    var rowType : ROW_TYPE
 
 
     constructor(title: String, rowType: ROW_TYPE) {
@@ -20,7 +20,9 @@ class Action {
 
     companion object {
         enum class ROW_TYPE {
-            CAMERA_OCR
+            ROW_TYPE_KEY,
+            CAMERA_OCR,
+            CAMERA_OBJECT_DETECTION
         }
     }
 }
