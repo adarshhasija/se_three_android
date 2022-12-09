@@ -2,11 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.starsearth.three">
 
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <!--<uses-permission android:name="android.permission.INTERNET" />-->
-    <!--<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />-->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" /> <!-- <uses-permission android:name="android.permission.INTERNET" /> -->
+    <!-- <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> -->
     <uses-permission android:name="android.permission.VIBRATE" />
+
     <uses-feature android:name="android.hardware.camera.any" />
+
     <uses-permission android:name="android.permission.CAMERA" />
 
     <meta-data
@@ -21,10 +22,12 @@
             android:roundIcon="@mipmap/sunodayko_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".CameraActivity">
-
-        </activity>
-        <activity android:name=".MainActivity"
+        <activity
+                android:name=".ActionActivity"
+                android:exported="false" />
+        <activity android:name=".CameraActivity"></activity>
+        <activity
+                android:name=".MainActivity"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -53,13 +53,19 @@ class ActionListFragment : Fragment() {
                 )
 
                 val actionList = ArrayList<Action>()
-                val action1 = Action("Text from Camera", "Are you trying to read the text on a door? Use this option to open the camera", Action.Companion.ROW_TYPE.CAMERA_OCR)
+                val action1 = Action("Time", "12 hour format", Action.Companion.ROW_TYPE.TIME_12HR)
                 actionList.add(action1)
+                val action2 = Action("Date", "Date and day of the week", Action.Companion.ROW_TYPE.DATE)
+                actionList.add(action2)
+                val action3 = Action("Battery Level", "Of this device as a percentage", Action.Companion.ROW_TYPE.BATTERY_LEVEL)
+                actionList.add(action3)
+            /*    val action4 = Action("Camera", "Want to read a sign like a flat number? Point the camera at a sign. We will read it and convert it into vibrations for you.", Action.Companion.ROW_TYPE.CAMERA_OCR)
+                actionList.add(action4)
                 if (BuildConfig.DEBUG) {
                     //Only for internal testing right now
-                    var action2 = Action("Search with Camera", "Are you trying to find something? Use this option", Action.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION)
-                    actionList.add(action2)
-                }
+                    var action5 = Action("Search with Camera", "Are you trying to find something? Use this option", Action.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION)
+                    actionList.add(action5)
+                } */
                 adapter = MyActionRecyclerViewAdapter(actionList, mContext, mListener)
             }
         }
@@ -78,8 +84,8 @@ class ActionListFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        //super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.fragment_action, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+        //inflater.inflate(R.menu.fragment_action, menu) //Uncomment this line if you need the actions here. As of now we dont need it in the overflow menu as we are putting it in the main list
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

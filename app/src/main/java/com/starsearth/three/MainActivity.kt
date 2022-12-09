@@ -3,31 +3,29 @@ package com.starsearth.three
 import android.Manifest
 import android.app.Activity
 import android.content.Context
-import android.os.Bundle
-import android.view.inputmethod.InputMethodManager
 import android.content.DialogInterface
 import android.content.Intent
-import com.starsearth.three.domain.ChatListItem
-import com.starsearth.three.fragments.lists.ChatListItemFragment
-import java.text.SimpleDateFormat
-import java.util.*
-import android.speech.tts.TextToSpeech
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.AudioManager
 import android.os.Build
-import android.util.Log
-import android.widget.Toast
+import android.os.Bundle
+import android.speech.tts.TextToSpeech
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
 import androidx.fragment.app.Fragment
 import com.starsearth.three.application.StarsEarthApplication
 import com.starsearth.three.domain.Action
+import com.starsearth.three.domain.ChatListItem
 import com.starsearth.three.fragments.*
 import com.starsearth.three.fragments.lists.ActionListFragment
+import com.starsearth.three.fragments.lists.ChatListItemFragment
 import com.starsearth.three.managers.AnalyticsManager
 import kotlinx.android.synthetic.main.fragment_chat_mode.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class MainActivity : AppCompatActivity(),
@@ -280,7 +278,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun openActionFromActionScreen(action: String) {
-        if (action == "TIME" || action == "DATE") {
+        if (action == "TIME" || action == "DATE" || action == "BATTERY_LEVEL") {
             val actionFragment = ActionFragment.newInstance(action)
             openNewFragment(actionFragment, ActionFragment.TAG)
         }
@@ -295,15 +293,34 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onActionListItemInteraction(action: Action) {
-        if (action.rowType == Action.Companion.ROW_TYPE.CAMERA_OCR) {
+        if (action.rowType == Action.Companion.ROW_TYPE.TIME_12HR) {
+            //Analytics call is in ActionFragment
+            openActionFromActionsListScreen("TIME")
+        }
+        else if (action.rowType == Action.Companion.ROW_TYPE.DATE) {
+            //Analytics call is in ActionFragment
+            openActionFromActionsListScreen("DATE")
+        }
+        else if (action.rowType == Action.Companion.ROW_TYPE.BATTERY_LEVEL) {
+            //Analytics call is in ActionFragment
+            openActionFromActionsListScreen("BATTERY_LEVEL")
+        }
+        else if (action.rowType == Action.Companion.ROW_TYPE.CAMERA_OCR) {
             (application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_CAMERA_OCR"
             )
+            openCameraActivityFromActionsList(action.rowType)
         }
-        openCameraActivityFromActionsList(action.rowType)
     }
 
     override fun openActionFromActionsListScreen(action: String) {
         openActionFromActionScreen(action) //using this function as it already exists. If the ActionFragment gets deleted, move the logic from 'openActionFromActionsScreen' to heres
     }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+
+        (supportFragmentManager?.fragments?.last() as? ActionFragment)?.autoPlay()
+    }
+
 }

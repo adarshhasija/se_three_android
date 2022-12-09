@@ -21,6 +21,9 @@ class Action {
     companion object {
         enum class ROW_TYPE {
             ROW_TYPE_KEY,
+            TIME_12HR,
+            DATE,
+            BATTERY_LEVEL,
             CAMERA_OCR,
             CAMERA_OBJECT_DETECTION
         }
