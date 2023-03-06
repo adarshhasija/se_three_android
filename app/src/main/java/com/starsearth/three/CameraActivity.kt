@@ -83,7 +83,7 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
 
         // Request camera permissions
         if (allPermissionsGranted()) {
-            (application as? StarsEarthApplication)?.sayThis(tvInstructions?.text?.toString())
+            //(application as? StarsEarthApplication)?.sayThis(tvInstructions?.text?.toString())
             startCamera()
 
             val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager

@@ -25,7 +25,8 @@ class Action {
             DATE,
             BATTERY_LEVEL,
             CAMERA_OCR,
-            CAMERA_OBJECT_DETECTION
+            CAMERA_OBJECT_DETECTION,
+            MANUAL
         }
     }
 }

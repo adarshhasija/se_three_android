@@ -2,6 +2,7 @@ package com.starsearth.three.utils
 
 import android.content.Context
 import android.os.BatteryManager
+import com.starsearth.three.domain.Braille
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.HashMap
@@ -143,6 +144,40 @@ class CustomVibrationPatternsUtils {
             returnMap["FINAL_STRING"] = finalString
             returnMap["FINAL_INSTRUCTIONS"] = finalInstructionStringArray
             return returnMap
+        }
+
+        fun getInfoTextForBraille(brailleString : String, brailleStringIndex: Int) : String? {
+            var text : String? = null
+            val index = brailleStringIndex
+
+            //Get the braille grid number
+            val brailleGridNumber =
+                if (brailleString.length > 10) {
+                    Braille.mappingBrailleGridNumbersToStringIndex.filter { brailleStringIndex == it.value }.keys.first()
+                } else {
+                    Braille.mappingBrailleGridToStringIndex.filter { brailleStringIndex == it.value }.keys.first()
+                }
+
+            val character = brailleString[index]
+            if (character == 'x') {
+                if (brailleGridNumber >  6) {
+                    val adjustedNumber = brailleGridNumber - 6
+                    text = "" //adjustedNumber.toString() + " No"
+                }
+                else {
+                    text = ""  //brailleGridNumber.toString() + " No"
+                }
+            }
+            if (character == 'o') {
+                if (brailleGridNumber >  6) {
+                    val adjustedNumber = brailleGridNumber - 6
+                    text = "Dot " + adjustedNumber.toString()
+                }
+                else {
+                    text = "Dot " + brailleGridNumber.toString()
+                }
+            }
+            return text
         }
     }
 }

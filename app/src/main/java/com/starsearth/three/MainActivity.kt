@@ -12,6 +12,9 @@ import android.os.Build
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
@@ -120,6 +123,37 @@ class MainActivity : AppCompatActivity(),
                 dialog.cancel()
             })
             .show()
+    }
+
+    private fun dialogForManualEntry() {
+        val alertDialog: AlertDialog.Builder = AlertDialog.Builder(this@MainActivity)
+        alertDialog.setTitle("Enter Letters or Numbers")
+        alertDialog.setMessage("Max 6 characters")
+
+        val input = EditText(this@MainActivity)
+        val lp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        input.layoutParams = lp
+        alertDialog.setView(input)
+
+        alertDialog.setPositiveButton("OK",
+            DialogInterface.OnClickListener { dialog, which ->
+                dialog.cancel()
+                val text = input.text.toString()
+                if (text.length > 6) {
+                    dialogOK("Text too long", "Must be 6 characters max")
+                }
+                else {
+                    openActionFromActionsListScreenWithManualInput(text)
+                }
+            })
+
+        alertDialog.setNegativeButton("CANCEL",
+            DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+
+        alertDialog.show()
     }
 
     private var textToSpeech: TextToSpeech? = null
@@ -292,6 +326,17 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    override fun openActionFromActionScreenManualInput(action: String, inputText: String) {
+        if (action == "MANUAL") {
+            val actionFragment = ActionFragment.newInstance(action, inputText)
+            openNewFragment(actionFragment, ActionFragment.TAG)
+        }
+    }
+
+    override fun openDialogForManualEntryFromActionFragment() {
+        dialogForManualEntry()
+    }
+
     override fun onActionListItemInteraction(action: Action) {
         if (action.rowType == Action.Companion.ROW_TYPE.TIME_12HR) {
             //Analytics call is in ActionFragment
@@ -305,6 +350,10 @@ class MainActivity : AppCompatActivity(),
             //Analytics call is in ActionFragment
             openActionFromActionsListScreen("BATTERY_LEVEL")
         }
+        else if (action.rowType == Action.Companion.ROW_TYPE.MANUAL) {
+            //Analytics call is in ActionFragment
+            dialogForManualEntry()
+        }
         else if (action.rowType == Action.Companion.ROW_TYPE.CAMERA_OCR) {
             (application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_CAMERA_OCR"
@@ -317,10 +366,14 @@ class MainActivity : AppCompatActivity(),
         openActionFromActionScreen(action) //using this function as it already exists. If the ActionFragment gets deleted, move the logic from 'openActionFromActionsScreen' to heres
     }
 
+    override fun openActionFromActionsListScreenWithManualInput(inputText: String) {
+        openActionFromActionScreenManualInput("MANUAL", inputText)
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
 
-        (supportFragmentManager?.fragments?.last() as? ActionFragment)?.autoPlay()
+        //(supportFragmentManager?.fragments?.last() as? ActionFragment)?.autoPlay()
     }
 
 }
