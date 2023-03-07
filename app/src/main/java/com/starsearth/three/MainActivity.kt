@@ -250,13 +250,20 @@ class MainActivity : AppCompatActivity(),
                 val cameraText = extras?.getString("text")
                 //val actionsFragment = supportFragmentManager.findFragmentByTag(ActionsFragment.TAG)
                 //(actionsFragment as? ActionsFragment)?.cameraResultReceived(cameraText)
-                (applicationContext as? StarsEarthApplication)?.sayThis(cameraText)
+                //(applicationContext as? StarsEarthApplication)?.sayThis(cameraText)
                 (applicationContext as? StarsEarthApplication)?.vibrate(
                     this,
                     "RESULT_SUCCESS"
                 )
-                val actionsFragment : Fragment = ActionsFragment.newInstance(cameraText)
-                openNewFragment(actionsFragment, ActionsFragment.TAG)
+                if (cameraText.isNullOrEmpty() == false) {
+                    val actionFragment : Fragment = ActionFragment.newInstance("MANUAL", cameraText)
+                    openNewFragment(actionFragment, ActionFragment.TAG)
+                }
+                else {
+                    dialogOK("Error","Nothing received from cammera. Please try again")
+                }
+                //val actionsFragment : Fragment = ActionsFragment.newInstance(cameraText) //This is old
+                //openNewFragment(actionsFragment, ActionsFragment.TAG)
             }
         }
     }

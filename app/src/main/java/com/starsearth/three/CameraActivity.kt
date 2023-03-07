@@ -146,7 +146,7 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
                     this, cameraSelector, preview, imageCapture, imageAnalyzer)
                 preview?.setSurfaceProvider(viewFinder.createSurfaceProvider(camera?.cameraInfo))
                 cl?.contentDescription = tvInstructions?.text.toString()
-                (applicationContext as? StarsEarthApplication)?.sayThis(tvInstructions?.text.toString())
+                //(applicationContext as? StarsEarthApplication)?.sayThis(tvInstructions?.text.toString())
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
