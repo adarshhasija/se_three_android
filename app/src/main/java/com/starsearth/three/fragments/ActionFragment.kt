@@ -27,7 +27,6 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -43,6 +42,7 @@ private const val ARG_INPUT_TEXT = "input-text"
 class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface {
     // TODO: Rename and change types of parameters
     private lateinit var mContext : Context
+    var mView : View? = null
     private var mInputAction: Action.Companion.ROW_TYPE? = null
     private var mInputText : String? = null
     private val morseCode = MorseCode()
@@ -106,8 +106,16 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        try {
+            if (mView == null) {
+                // view will be initialize for the first time .. you can out condition for that if data is not null then do not initialize view again.
+                mView = inflater.inflate(R.layout.fragment_action, container, false)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_action, container, false)
+        return mView//inflater.inflate(R.layout.fragment_action, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -125,6 +133,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         btnNextCharacter?.setOnClickListener {
             if (mMorseCodeIndex < 0) mMorseCodeIndex = -1
             if (alphanumericArrayIndex < 0) alphanumericArrayIndex = 0
+            if (alphanumericFullStringSplitBySpaceAsArrayIndex < 0) alphanumericFullStringSplitBySpaceAsArrayIndex = 0
             goToNextCharacter()
             if (mMorseCodeIndex >= 0) {
                 btnReset?.visibility = View.VISIBLE
@@ -141,6 +150,25 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             else {
                 btnSwitchReadDirection?.text = "Read sideways"
             }
+        }
+        btnFullText?.setOnClickListener {
+            var text = ""
+            var startIndexForHighlighting = 0
+            var endIndexForHighlighting = 0
+            for (word in alphanumericFullStringSplitBySpaceAsArray) {
+                text += word
+                text += " "
+            }
+            text = text.trim()
+            for (i in alphanumericFullStringSplitBySpaceAsArray.indices) {
+                if (i < alphanumericFullStringSplitBySpaceAsArrayIndex) {
+                    startIndexForHighlighting += alphanumericFullStringSplitBySpaceAsArray[i].length //Need to increment by length of  the word that was completed
+                    startIndexForHighlighting++ //account for space after the word
+                }
+            }
+            startIndexForHighlighting += alphanumericArrayIndex //account for exactly where we are in the word
+            endIndexForHighlighting = startIndexForHighlighting + 1
+            listener?.fromActionFragmentFullTextButtonTapped(text, startIndexForHighlighting, endIndexForHighlighting)
         }
         btnReset?.setOnClickListener {
             reset()
@@ -195,15 +223,19 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_MANUAL"
             )
-            val splitList = mInputText?.split("\\s".toRegex())?.toTypedArray()
-            splitList?.let {
-                for (item in it) alphanumericFullStringSplitBySpaceAsArray.add(item)
-                mInputText = alphanumericFullStringSplitBySpaceAsArray.first()
-                alphanumericArrayForBraille?.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
-                tvAlphanumerics?.text = mInputText
-                tvMorseCode?.text = alphanumericArrayForBraille?.first()
-                mainHandler = Handler(Looper.getMainLooper())
-                autoPlay()
+            if (alphanumericFullStringSplitBySpaceAsArray.isEmpty()) {
+                //We are not coming back from another fragment. First time setup
+                val splitList = mInputText?.split("\\s".toRegex())?.toTypedArray()
+                splitList?.let {
+                    if (it.size > 1) btnFullText?.visibility = View.VISIBLE //Means its more than 1 word
+                    for (item in it) alphanumericFullStringSplitBySpaceAsArray.add(item)
+                    mInputText = alphanumericFullStringSplitBySpaceAsArray.first()
+                    alphanumericArrayForBraille?.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
+                    tvAlphanumerics?.text = mInputText
+                    tvMorseCode?.text = alphanumericArrayForBraille?.first()
+                    mainHandler = Handler(Looper.getMainLooper())
+                    autoPlay()
+                }
             }
         }
         else {
@@ -220,24 +252,35 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         //}
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("MORSE_CODE_INDEX", mMorseCodeIndex)
+        outState.putInt("BRAILLE_STRING_INDEX", brailleStringIndex)
+        outState.putInt("ALPHANUMBERIC_ARRAY_INDEX", alphanumericArrayIndex)
+        outState.putInt("ALPHANUMERIC_FULL_STRING_ARRAY_INDEX", alphanumericFullStringSplitBySpaceAsArrayIndex)
+        outState.putBoolean("BRAILLE_SWITCHED_TO_HORIZONTAL", isBrailleSwitchedToHorizontal)
+        outState.putString("INPUT_TEXT", mInputText)
+    }
+
     fun reset() {
         tvFashText?.text = ""
         mMorseCodeIndex = -1
         brailleStringIndex = -1
-        alphanumericArrayIndex = 0
-        alphanumericFullStringSplitBySpaceAsArrayIndex = 0
-        mInputText = alphanumericFullStringSplitBySpaceAsArray[alphanumericFullStringSplitBySpaceAsArrayIndex]
+        alphanumericArrayIndex = -1
+        alphanumericFullStringSplitBySpaceAsArrayIndex = -1
+        mInputText = alphanumericFullStringSplitBySpaceAsArray[0]
         tvAlphanumerics?.text = mInputText
         //tvMorseCode reset
         alphanumericArrayForBraille?.clear()
         alphanumericArrayForBraille?.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
-        tvMorseCode?.text = alphanumericArrayForBraille?.get(alphanumericArrayIndex)
+        tvMorseCode?.text = alphanumericArrayForBraille?.get(0)
         //
         btnReset?.visibility = View.GONE
         btnReplay?.visibility = View.VISIBLE
         btnReplay?.text = "Replay"
         btnNextCharacter?.visibility = View.VISIBLE
-        btnSwitchReadDirection?.visibility = View.VISIBLE
+        //btnSwitchReadDirection?.visibility = View.VISIBLE
+        if (alphanumericFullStringSplitBySpaceAsArray.size > 1) btnFullText?.visibility = View.VISIBLE
 
         val text = tvMorseCode?.text.toString()
         val spannable: Spannable = SpannableString(text)
@@ -452,7 +495,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             )
         }
         if (/*numberOfPipes*/alphanumericArrayIndex + 1 < tvAlphanumerics.text.length) {
-            spannable.setSpan(
+            spannableAlphanumeric.setSpan(
                 ForegroundColorSpan(Color.BLACK),
                 /*numberOfPipes*/alphanumericArrayIndex + 1,
                 tvAlphanumerics.text.length,
@@ -468,6 +511,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         fun openActionFromActionScreen(action: String)
         fun openActionFromActionScreenManualInput(action: String, inputText: String)
         fun openDialogForManualEntryFromActionFragment()
+        fun fromActionFragmentFullTextButtonTapped(text: String, startIndexForHighlighting: Int, endIndexForHighlighting: Int)
     }
 
     companion object {
@@ -571,6 +615,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         btnReset?.visibility = View.GONE
         btnNextCharacter?.visibility = View.GONE
         btnSwitchReadDirection?.visibility = View.GONE
+        btnFullText?.visibility = View.GONE
         mainHandler.post(updateTextTask)
     }
 

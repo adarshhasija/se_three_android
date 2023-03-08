@@ -156,6 +156,13 @@ class MainActivity : AppCompatActivity(),
         alertDialog.show()
     }
 
+    private fun handSendText(intent: Intent) {
+        intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+            val actionFragment : Fragment = ActionFragment.newInstance("MANUAL", it)
+            openNewFragment(actionFragment, ActionFragment.TAG)
+        }
+    }
+
     private var textToSpeech: TextToSpeech? = null
     val CAMERA_ACTIVITY = 100
     //private lateinit var mChatModeFragment : ChatModeFragment
@@ -185,6 +192,13 @@ class MainActivity : AppCompatActivity(),
             ?.replace(R.id.fragment_container_main, actionListFragment, ActionListFragment.TAG)
             //?.addToBackStack(ActionsFragment.TAG)
             ?.commit()
+
+        //to activate the sharing capability, uncomment the intent filter under MainActivity in Manifest file
+        if (intent?.action == Intent.ACTION_SEND) {
+            if ("text/plain" == intent.type) {
+                handSendText(intent)
+            }
+        }
     }
 
     override fun onPause() {
@@ -342,6 +356,15 @@ class MainActivity : AppCompatActivity(),
 
     override fun openDialogForManualEntryFromActionFragment() {
         dialogForManualEntry()
+    }
+
+    override fun fromActionFragmentFullTextButtonTapped(
+        text: String,
+        startIndexForHighlighting: Int,
+        endIndexForHighlighting: Int
+    ) {
+        val fullTextFragment = FullTextFragment.newInstance(text, startIndexForHighlighting, endIndexForHighlighting)
+        openNewFragment(fullTextFragment, FullTextFragment.TAG)
     }
 
     override fun onActionListItemInteraction(action: Action) {

@@ -60,9 +60,23 @@
 
         <Button
                 android:id="@+id/btnSwitchReadDirection"
+                android:visibility="gone"
                 android:background="#0000FF"
                 android:textColor="#FFFFFF"
                 android:text="Read Sideways"
+                android:paddingTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+
+        <Button
+                android:id="@+id/btnFullText"
+                android:visibility="gone"
+                android:background="#0000FF"
+                android:textColor="#FFFFFF"
+                android:text="See Full Text"
                 android:paddingTop="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
