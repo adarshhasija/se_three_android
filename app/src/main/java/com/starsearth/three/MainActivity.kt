@@ -127,8 +127,8 @@ class MainActivity : AppCompatActivity(),
 
     private fun dialogForManualEntry() {
         val alertDialog: AlertDialog.Builder = AlertDialog.Builder(this@MainActivity)
-        alertDialog.setTitle("Enter Letters or Numbers")
-        alertDialog.setMessage("Max 6 characters")
+        alertDialog.setTitle("Enter Letters or Numbers or Spaces")
+        alertDialog.setMessage("No special characters")
 
         val input = EditText(this@MainActivity)
         val lp = LinearLayout.LayoutParams(
@@ -141,13 +141,13 @@ class MainActivity : AppCompatActivity(),
         alertDialog.setPositiveButton("OK",
             DialogInterface.OnClickListener { dialog, which ->
                 dialog.cancel()
-                val text = input.text.toString()
-                if (text.length > 6) {
+                val text = input.text.toString().uppercase()
+            /*    if (text.length > 6) {
                     dialogOK("Text too long", "Must be 6 characters max")
                 }
-                else {
+                else {  */
                     openActionFromActionsListScreenWithManualInput(text)
-                }
+                //}
             })
 
         alertDialog.setNegativeButton("CANCEL",

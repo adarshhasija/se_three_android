@@ -13,7 +13,6 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.view.*
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.starsearth.three.R
@@ -29,7 +28,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
-import kotlin.concurrent.schedule
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -55,6 +53,8 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     var isAutoPlayOn = false
     var alphanumericArrayIndex = -1 //in the case of braille
     var alphanumericArrayForBraille : ArrayList<String>? = ArrayList()
+    var alphanumericFullStringSplitBySpaceAsArray : ArrayList<String> = ArrayList()
+    var alphanumericFullStringSplitBySpaceAsArrayIndex : Int = -1
     var braille = Braille()
     var isBrailleSwitchedToHorizontal = false
 
@@ -62,7 +62,9 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
 
     private val updateTextTask = object : Runnable {
         override fun run() {
-            if (mMorseCodeIndex >= tvMorseCode.text.length && alphanumericArrayIndex >= alphanumericArrayForBraille?.size?.minus(1) ?: 0) {
+            if (mMorseCodeIndex >= tvMorseCode.text.length
+                && alphanumericArrayIndex >= alphanumericArrayForBraille?.size?.minus(1) ?: 0
+                && alphanumericFullStringSplitBySpaceAsArrayIndex >= (alphanumericFullStringSplitBySpaceAsArray.size - 1)) {
                 stopAutoplay()
                 return
             }
@@ -193,11 +195,16 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_MANUAL"
             )
-            alphanumericArrayForBraille?.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
-            tvAlphanumerics?.text = mInputText?.uppercase()
-            tvMorseCode?.text = alphanumericArrayForBraille?.first()
-            mainHandler = Handler(Looper.getMainLooper())
-            autoPlay()
+            val splitList = mInputText?.split("\\s".toRegex())?.toTypedArray()
+            splitList?.let {
+                for (item in it) alphanumericFullStringSplitBySpaceAsArray.add(item)
+                mInputText = alphanumericFullStringSplitBySpaceAsArray.first()
+                alphanumericArrayForBraille?.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
+                tvAlphanumerics?.text = mInputText
+                tvMorseCode?.text = alphanumericArrayForBraille?.first()
+                mainHandler = Handler(Looper.getMainLooper())
+                autoPlay()
+            }
         }
         else {
             val instruction = "Are you trying to read the text on a door?\nSwipe up to open camera"
@@ -216,9 +223,16 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     fun reset() {
         tvFashText?.text = ""
         mMorseCodeIndex = -1
-        alphanumericArrayIndex = -1
         brailleStringIndex = -1
-        tvMorseCode?.text = alphanumericArrayForBraille?.first()
+        alphanumericArrayIndex = 0
+        alphanumericFullStringSplitBySpaceAsArrayIndex = 0
+        mInputText = alphanumericFullStringSplitBySpaceAsArray[alphanumericFullStringSplitBySpaceAsArrayIndex]
+        tvAlphanumerics?.text = mInputText
+        //tvMorseCode reset
+        alphanumericArrayForBraille?.clear()
+        alphanumericArrayForBraille?.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
+        tvMorseCode?.text = alphanumericArrayForBraille?.get(alphanumericArrayIndex)
+        //
         btnReset?.visibility = View.GONE
         btnReplay?.visibility = View.VISIBLE
         btnReplay?.text = "Replay"
@@ -258,6 +272,21 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             ?.setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     //tvFashText?.visibility = View.GONE
+                }
+            })
+    }
+
+    private fun flashAlphanumericLabelChange() {
+        tvAlphanumerics?.alpha = 0f
+        tvAlphanumerics?.visibility = View.VISIBLE
+
+        //Only needed during autoplay
+        tvAlphanumerics?.animate()
+            ?.alpha(1f)
+            ?.setDuration(250)
+            ?.setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    //tvMorseCode?.visibility = View.GONE
                 }
             })
     }
@@ -531,6 +560,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     }
 
     fun autoPlay() {
+        alphanumericFullStringSplitBySpaceAsArrayIndex = 0
         alphanumericArrayIndex = 0
         mMorseCodeIndex = -1
         brailleStringIndex = -1
@@ -564,8 +594,23 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
                 }
                 else if (mMorseCodeIndex >= tvMorseCode.text.length) {
                     if (alphanumericArrayIndex < alphanumericArrayForBraille?.size?.minus(1) ?: 0) {
+                        //move to next letter
                         alphanumericArrayIndex++
                         tvMorseCode?.text = alphanumericArrayForBraille?.get(alphanumericArrayIndex)
+                        flashBrailleGridChange()
+                        mMorseCodeIndex = 0
+                    }
+                    else if (alphanumericFullStringSplitBySpaceAsArrayIndex < (alphanumericFullStringSplitBySpaceAsArray.size - 1)) {
+                        //we have reached the end of the word
+                        //move to the next word
+                        alphanumericFullStringSplitBySpaceAsArrayIndex++
+                        mInputText = alphanumericFullStringSplitBySpaceAsArray[alphanumericFullStringSplitBySpaceAsArrayIndex]
+                        alphanumericArrayIndex = 0
+                        alphanumericArrayForBraille?.clear()
+                        alphanumericArrayForBraille?.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
+                        tvAlphanumerics?.text = mInputText
+                        tvMorseCode?.text = alphanumericArrayForBraille?.get(alphanumericArrayIndex)
+                        flashAlphanumericLabelChange()
                         flashBrailleGridChange()
                         mMorseCodeIndex = 0
                     }
