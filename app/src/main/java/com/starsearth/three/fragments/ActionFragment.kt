@@ -42,7 +42,7 @@ private const val ARG_INPUT_TEXT = "input-text"
 class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface {
     // TODO: Rename and change types of parameters
     private lateinit var mContext : Context
-    var mView : View? = null
+    var mView : View? = null //When we return to this fragment from another fragment we are losing the data. So we are using this to store it
     private var mInputAction: Action.Companion.ROW_TYPE? = null
     private var mInputText : String? = null
     private val morseCode = MorseCode()
@@ -59,6 +59,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     var isBrailleSwitchedToHorizontal = false
 
     lateinit var mainHandler: Handler
+    var isRunnablePosted = false
 
     private val updateTextTask = object : Runnable {
         override fun run() {
@@ -596,11 +597,15 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     override fun onPause() {
         super.onPause()
         mainHandler.removeCallbacks(updateTextTask)
+        isRunnablePosted = false
     }
 
     override fun onResume() {
         super.onResume()
-        //mainHandler.post(updateTextTask) //This remains commmented out as it was causing a bug
+        if (isRunnablePosted == false) {
+            mainHandler.post(updateTextTask) //This waas commmented out as it was causing a bug
+            isRunnablePosted = true
+        }
     }
 
     fun autoPlay() {
@@ -617,11 +622,13 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         btnSwitchReadDirection?.visibility = View.GONE
         btnFullText?.visibility = View.GONE
         mainHandler.post(updateTextTask)
+        isRunnablePosted = true
     }
 
     fun stopAutoplay() {
         isAutoPlayOn = false
         mainHandler.removeCallbacks(updateTextTask)
+        isRunnablePosted = false
         reset()
     }
 
