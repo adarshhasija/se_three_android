@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity(),
 
     private fun dialogForManualEntry() {
         val alertDialog: AlertDialog.Builder = AlertDialog.Builder(this@MainActivity)
-        alertDialog.setTitle("Enter Letters or Numbers or Spaces")
+        alertDialog.setTitle("Enter Letters or Numbers")
         alertDialog.setMessage("No special characters")
 
         val input = EditText(this@MainActivity)
