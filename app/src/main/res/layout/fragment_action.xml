@@ -33,30 +33,50 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-        <Button
-                android:id="@+id/btnReplay"
-                android:background="#0000FF"
-                android:textColor="#FFFFFF"
-                android:text="Replay"
-                android:visibility="gone"
-                android:paddingTop="10dp"
-                android:layout_width="match_parent"
+        <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+                android:orientation="horizontal">
 
-        <Button
-                android:id="@+id/btnNextCharacter"
-                android:background="#0000FF"
-                android:textColor="#FFFFFF"
-                android:text="Next Character"
-                android:paddingTop="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+            <ImageButton
+                    android:id="@+id/btnPreviousCharacter"
+                    android:background="#000000FF"
+                    android:src="@drawable/arrow_back_ios_filll0_wght400_grad0_opsz48"
+                    android:contentDescription="Previous character button"
+                    android:tint="#0000FF"
+                    android:paddingTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+
+            <ImageButton
+                    android:id="@+id/btnPlayPause"
+                    android:background="#000000FF"
+                    android:src="@drawable/play_arrow_fill0_wght400_grad0_opsz48"
+                    android:tint="#0000FF"
+                    android:paddingTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+
+            <ImageButton
+                    android:id="@+id/btnNextCharacter"
+                    android:background="#000000FF"
+                    android:src="@drawable/arrow_forward_ios_fill0_wght400_grad0_opsz48"
+                    android:tint="#0000FF"
+                    android:contentDescription="Next character button"
+                    android:paddingTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+
+        </LinearLayout>
 
         <Button
                 android:id="@+id/btnSwitchReadDirection"
@@ -74,11 +94,14 @@
         <Button
                 android:id="@+id/btnFullText"
                 android:visibility="gone"
-                android:background="#0000FF"
-                android:textColor="#FFFFFF"
-                android:text="See Full Text"
+                android:background="#00FFFFFF"
+                android:textColor="#0000FF"
+                android:text="Full Text"
+                android:drawableLeft="@drawable/notes_fill0_wght400_grad0_opsz48"
+                android:drawableTint="#0000FF"
+                android:contentDescription="Full Text Button"
                 android:paddingTop="10dp"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -86,11 +109,14 @@
 
         <Button
                 android:id="@+id/btnReset"
-                android:background="#FF0000"
-                android:textColor="#FFFFFF"
+                android:background="#00FF0000"
+                android:textColor="#FF0000"
                 android:text="RESET"
+                android:drawableLeft="@drawable/replay_fill0_wght400_grad0_opsz48"
+                android:drawableTint="#FF0000"
+                android:contentDescription="Reset Button"
                 android:paddingTop="10dp"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 app:layout_constraintLeft_toLeftOf="parent"

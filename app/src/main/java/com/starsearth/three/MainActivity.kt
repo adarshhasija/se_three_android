@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity(),
         alertDialog.setPositiveButton("OK",
             DialogInterface.OnClickListener { dialog, which ->
                 dialog.cancel()
-                val text = input.text.toString().uppercase()
+                val text = input.text.toString()//.uppercase()
             /*    if (text.length > 6) {
                     dialogOK("Text too long", "Must be 6 characters max")
                 }

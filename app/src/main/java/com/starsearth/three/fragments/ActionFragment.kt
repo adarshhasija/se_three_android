@@ -49,12 +49,11 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     private var mMorseCodeIndex = -1
     private var listener: OnActionFragmentInteractionListener? = null
     private var mInstructionsStringArray : ArrayList<String>? = arrayListOf()
-    var brailleStringIndex = -1
     var isAutoPlayOn = false
-    var arrayBrailleGridsForCharsInWord : ArrayList<String>? = ArrayList()
-    var arrayBrailleGridsForCharsInWordIndex = -1 //in the case of braille
-    var arrayWordsInString : ArrayList<String> = ArrayList()
-    var arrayWordsInStringIndex : Int = -1
+    var mArrayBrailleGridsForCharsInWord : ArrayList<String> = ArrayList()
+    var mArrayBrailleGridsForCharsInWordIndex = 0 //in the case of braille
+    var mArrayWordsInString : ArrayList<String> = ArrayList()
+    var mArrayWordsInStringIndex : Int = 0
     var braille = Braille()
     var isBrailleSwitchedToHorizontal = false
 
@@ -63,15 +62,19 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
 
     private val updateTextTask = object : Runnable {
         override fun run() {
-            if (mMorseCodeIndex >= tvMorseCode.text.length
-                && arrayBrailleGridsForCharsInWordIndex >= arrayBrailleGridsForCharsInWord?.size?.minus(1) ?: 0
-                && arrayWordsInStringIndex >= (arrayWordsInString.size - 1)) {
-                stopAutoplay()
+            val morseCodeString = tvMorseCode.text
+            val brailleStringIndex = braille.getNextIndexForBrailleTraversal(morseCodeString.length, mMorseCodeIndex, isBrailleSwitchedToHorizontal)
+
+            if (mMorseCodeIndex > 0 && brailleStringIndex == -1 //This combination means we are looking at the ending of the braille grid, not the start
+                && mArrayBrailleGridsForCharsInWordIndex >= (mArrayBrailleGridsForCharsInWord.size - 1)
+                && mArrayWordsInStringIndex >= (mArrayWordsInString.size - 1)) {
+                pauseAutoPlayAndReset()
                 return
             }
             if (braille.isMidpointReachedForNumber(tvMorseCode.text.length, brailleStringIndex)) {
                 TimeUnit.MILLISECONDS.sleep(250)
             }
+            mMorseCodeIndex++
             goToNextCharacter()
             mainHandler.postDelayed(this, 1000)
         }
@@ -122,26 +125,35 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        btnReplay?.setOnClickListener {
-            isAutoPlayOn = !isAutoPlayOn
-            if (isAutoPlayOn) {
-                autoPlay()
-            }
-            else {
-                stopAutoplay()
-            }
-        }
-        btnNextCharacter?.setOnClickListener {
-            if (mMorseCodeIndex < 0) mMorseCodeIndex = -1
-            if (arrayBrailleGridsForCharsInWordIndex < 0) arrayBrailleGridsForCharsInWordIndex = 0
-            if (arrayWordsInStringIndex < 0) arrayWordsInStringIndex = 0
-            goToNextCharacter()
+        btnPreviousCharacter?.setOnClickListener {
+            mMorseCodeIndex--
             if (mMorseCodeIndex >= 0) {
                 btnReset?.visibility = View.VISIBLE
             }
             else {
                 btnReset?.visibility = View.GONE
             }
+            goToPreviousCharacter()
+        }
+        btnPlayPause?.setOnClickListener {
+            isAutoPlayOn = !isAutoPlayOn
+            if (isAutoPlayOn) {
+                autoPlay()
+            }
+            else {
+                pauseAutoPlay()
+            }
+            playPauseButtonTappedUIChange()
+        }
+        btnNextCharacter?.setOnClickListener {
+            mMorseCodeIndex++
+            if (mMorseCodeIndex >= 0) {
+                btnReset?.visibility = View.VISIBLE
+            }
+            else {
+                btnReset?.visibility = View.GONE
+            }
+            goToNextCharacter()
         }
         btnSwitchReadDirection?.setOnClickListener {
             isBrailleSwitchedToHorizontal = !isBrailleSwitchedToHorizontal
@@ -156,22 +168,29 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             var text = ""
             var startIndexForHighlighting = 0
             var endIndexForHighlighting = 0
-            for (word in arrayWordsInString) {
+            for (word in mArrayWordsInString) {
                 text += word
                 text += " "
             }
             text = text.trim()
-            for (i in arrayWordsInString.indices) {
-                if (i < arrayWordsInStringIndex) {
-                    startIndexForHighlighting += arrayWordsInString[i].length //Need to increment by length of  the word that was completed
+            for (i in mArrayWordsInString.indices) {
+                if (i < mArrayWordsInStringIndex) {
+                    startIndexForHighlighting += mArrayWordsInString[i].length //Need to increment by length of  the word that was completed
                     startIndexForHighlighting++ //account for space after the word
                 }
             }
-            startIndexForHighlighting += arrayBrailleGridsForCharsInWordIndex //account for exactly where we are in the word
-            endIndexForHighlighting = startIndexForHighlighting + 1
+            startIndexForHighlighting += mArrayBrailleGridsForCharsInWordIndex //account for exactly where we are in the word
+            endIndexForHighlighting = if (mMorseCodeIndex > -1) {
+                //Means we have started traversing and there is something to highlight
+                startIndexForHighlighting + 1
+            }
+            else {
+                startIndexForHighlighting
+            }
             listener?.fromActionFragmentFullTextButtonTapped(text, startIndexForHighlighting, endIndexForHighlighting)
         }
         btnReset?.setOnClickListener {
+            removeHighlighting()
             reset()
         }
 
@@ -224,18 +243,18 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_MANUAL"
             )
-            if (arrayWordsInString.isEmpty()) {
+            if (mArrayWordsInString.isEmpty()) {
                 //We are not coming back from another fragment. First time setup
                 val splitList = mInputText?.split("\\s".toRegex())?.toTypedArray()
                 splitList?.let {
-                    if (it.size > 1) btnFullText?.visibility = View.VISIBLE //Means its more than 1 word
-                    for (item in it) arrayWordsInString.add(item)
-                    mInputText = arrayWordsInString.first()
-                    arrayBrailleGridsForCharsInWord?.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
+                    btnFullText?.visibility = View.VISIBLE //Means its more than 1 word
+                    for (item in it) mArrayWordsInString.add(item)
+                    mInputText = mArrayWordsInString.first()
+                    mArrayBrailleGridsForCharsInWord.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
                     tvAlphanumerics?.text = mInputText
-                    tvMorseCode?.text = arrayBrailleGridsForCharsInWord?.first()
+                    tvMorseCode?.text = mArrayBrailleGridsForCharsInWord.first()
                     mainHandler = Handler(Looper.getMainLooper())
-                    autoPlay()
+                    //autoPlay()
                 }
             }
         }
@@ -256,9 +275,8 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("MORSE_CODE_INDEX", mMorseCodeIndex)
-        outState.putInt("BRAILLE_STRING_INDEX", brailleStringIndex)
-        outState.putInt("ALPHANUMBERIC_ARRAY_INDEX", arrayBrailleGridsForCharsInWordIndex)
-        outState.putInt("ALPHANUMERIC_FULL_STRING_ARRAY_INDEX", arrayWordsInStringIndex)
+        outState.putInt("ALPHANUMBERIC_ARRAY_INDEX", mArrayBrailleGridsForCharsInWordIndex)
+        outState.putInt("ALPHANUMERIC_FULL_STRING_ARRAY_INDEX", mArrayWordsInStringIndex)
         outState.putBoolean("BRAILLE_SWITCHED_TO_HORIZONTAL", isBrailleSwitchedToHorizontal)
         outState.putString("INPUT_TEXT", mInputText)
     }
@@ -266,23 +284,27 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     fun reset() {
         tvFashText?.text = ""
         mMorseCodeIndex = -1
-        brailleStringIndex = -1
-        arrayBrailleGridsForCharsInWordIndex = -1
-        arrayWordsInStringIndex = -1
-        mInputText = arrayWordsInString[0]
+        mArrayBrailleGridsForCharsInWordIndex = 0
+        mArrayWordsInStringIndex = 0
+        mInputText = mArrayWordsInString[0]
         tvAlphanumerics?.text = mInputText
         //tvMorseCode reset
-        arrayBrailleGridsForCharsInWord?.clear()
-        arrayBrailleGridsForCharsInWord?.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
-        tvMorseCode?.text = arrayBrailleGridsForCharsInWord?.get(0)
+        mArrayBrailleGridsForCharsInWord.clear()
+        mArrayBrailleGridsForCharsInWord.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
+        tvMorseCode?.text = mArrayBrailleGridsForCharsInWord.get(0)
         //
         btnReset?.visibility = View.GONE
-        btnReplay?.visibility = View.VISIBLE
-        btnReplay?.text = "Replay"
+        btnPlayPause?.visibility = View.VISIBLE
+        btnPlayPause?.setImageResource(R.drawable.play_arrow_fill0_wght400_grad0_opsz48)
+        btnPlayPause?.contentDescription = "Play Button"
+        btnPreviousCharacter?.visibility = View.VISIBLE
         btnNextCharacter?.visibility = View.VISIBLE
         //btnSwitchReadDirection?.visibility = View.VISIBLE
-        if (arrayWordsInString.size > 1) btnFullText?.visibility = View.VISIBLE //Wanted to remove the if condition but was craashing
+        btnFullText?.visibility = View.VISIBLE //Wanted to remove the if condition but was craashing
+        removeHighlighting()
+    }
 
+    private fun removeHighlighting() {
         val text = tvMorseCode?.text.toString()
         val spannable: Spannable = SpannableString(text)
         spannable.setSpan(
@@ -404,17 +426,16 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     }
 
     fun mcScroll() {
-        val text = tvMorseCode.text
-        if (mMorseCodeIndex < 0 || mMorseCodeIndex >= text.length) {
+    /*    if (mMorseCodeIndex < 0 || mMorseCodeIndex >= text.length) {
             (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
                 mContext,
                 "RESULT_SUCCESS"
             ) //Indicates there is nothing more here
+            removeHighlighting()
             return
-        }
-        val spannable: Spannable = SpannableString(text)
-
+        }   */
         val morseCodeString = tvMorseCode.text
+        val spannable: Spannable = SpannableString(morseCodeString)
         val brailleStringIndex = braille.getNextIndexForBrailleTraversal(morseCodeString.length, mMorseCodeIndex, isBrailleSwitchedToHorizontal)
         if (brailleStringIndex == -1) {
             return
@@ -427,7 +448,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-        if (/*mMorseCodeIndex*/brailleStringIndex > -1 && /*mMorseCodeIndex*/brailleStringIndex < text.length) {
+        if (/*mMorseCodeIndex*/brailleStringIndex > -1 && /*mMorseCodeIndex*/brailleStringIndex < morseCodeString.length) {
             spannable.setSpan(
                 ForegroundColorSpan(Color.GREEN),
                 /*mMorseCodeIndex*/brailleStringIndex,
@@ -435,23 +456,23 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-        if (/*mMorseCodeIndex*/brailleStringIndex > -1 && /*mMorseCodeIndex*/brailleStringIndex + 1 < text.length) {
+        if (/*mMorseCodeIndex*/brailleStringIndex > -1 && /*mMorseCodeIndex*/brailleStringIndex + 1 < morseCodeString.length) {
             spannable.setSpan(
                 ForegroundColorSpan(Color.BLACK),
                 /*mMorseCodeIndex*/brailleStringIndex + 1,
-                text.length,
+                morseCodeString.length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
 
         tvMorseCode.setText(spannable, TextView.BufferType.SPANNABLE)
-        if (text[/*mMorseCodeIndex*/brailleStringIndex] == '.' || text[/*mMorseCodeIndex*/brailleStringIndex] == 'x') {
+        if (morseCodeString[/*mMorseCodeIndex*/brailleStringIndex] == '.' || morseCodeString[/*mMorseCodeIndex*/brailleStringIndex] == 'x') {
             (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext, "MC_DOT")
         }
-        else if (text[/*mMorseCodeIndex*/brailleStringIndex] == '-' || text[/*mMorseCodeIndex*/brailleStringIndex] == 'o') {
+        else if (morseCodeString[/*mMorseCodeIndex*/brailleStringIndex] == '-' || morseCodeString[/*mMorseCodeIndex*/brailleStringIndex] == 'o') {
             (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext, "MC_DASH")
         }
-        else if (text[/*mMorseCodeIndex*/brailleStringIndex] == '|') {
+        else if (morseCodeString[/*mMorseCodeIndex*/brailleStringIndex] == '|') {
             (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
                 mContext,
                 "RESULT_SUCCESS"
@@ -484,21 +505,21 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         spannableAlphanumeric.setSpan(
             ForegroundColorSpan(Color.BLACK),
             0,
-            /*numberOfPipes*/arrayBrailleGridsForCharsInWordIndex,
+            /*numberOfPipes*/mArrayBrailleGridsForCharsInWordIndex,
             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         )
-        if (/*numberOfPipes*/arrayBrailleGridsForCharsInWordIndex < tvAlphanumerics.text.length) {
+        if (/*numberOfPipes*/mArrayBrailleGridsForCharsInWordIndex < tvAlphanumerics.text.length) {
             spannableAlphanumeric.setSpan(
                 ForegroundColorSpan(Color.GREEN),
-                /*numberOfPipes*/arrayBrailleGridsForCharsInWordIndex,
-                /*numberOfPipes*/arrayBrailleGridsForCharsInWordIndex + 1,
+                /*numberOfPipes*/mArrayBrailleGridsForCharsInWordIndex,
+                /*numberOfPipes*/mArrayBrailleGridsForCharsInWordIndex + 1,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-        if (/*numberOfPipes*/arrayBrailleGridsForCharsInWordIndex + 1 < tvAlphanumerics.text.length) {
+        if (/*numberOfPipes*/mArrayBrailleGridsForCharsInWordIndex + 1 < tvAlphanumerics.text.length) {
             spannableAlphanumeric.setSpan(
                 ForegroundColorSpan(Color.BLACK),
-                /*numberOfPipes*/arrayBrailleGridsForCharsInWordIndex + 1,
+                /*numberOfPipes*/mArrayBrailleGridsForCharsInWordIndex + 1,
                 tvAlphanumerics.text.length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
@@ -602,22 +623,45 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
 
     override fun onResume() {
         super.onResume()
-        if (isRunnablePosted == false) {
-            mainHandler.post(updateTextTask) //This waas commmented out as it was causing a bug
+        if (isRunnablePosted == false && isAutoPlayOn == true) {
+            mainHandler.post(updateTextTask) //This was commented out as it was causing a bug
             isRunnablePosted = true
         }
     }
 
+    fun playPauseButtonTappedUIChange() {
+        if (isAutoPlayOn == true) {
+            btnPlayPause?.setImageDrawable(context?.resources?.getDrawable(R.drawable.pause_fill0_wght400_grad0_opsz48))
+            btnPlayPause?.contentDescription = "Pause Button"
+            btnPreviousCharacter?.visibility = View.GONE
+            btnNextCharacter?.visibility = View.GONE
+            btnFullText?.visibility = View.GONE
+            btnReset?.visibility = View.GONE
+        }
+        else {
+            btnPlayPause?.setImageDrawable(context?.resources?.getDrawable(R.drawable.play_arrow_fill0_wght400_grad0_opsz48))
+            btnPlayPause?.contentDescription = "Play Button"
+            btnPreviousCharacter?.visibility = View.VISIBLE
+            btnNextCharacter?.visibility = View.VISIBLE
+            btnFullText?.visibility = View.VISIBLE
+            btnReset?.visibility = View.GONE
+        }
+    }
+
     fun autoPlay() {
-        arrayWordsInStringIndex = 0
-        arrayBrailleGridsForCharsInWordIndex = 0
-        mMorseCodeIndex = -1
-        brailleStringIndex = -1
-        tvMorseCode?.text = arrayBrailleGridsForCharsInWord?.first()
+        if (mMorseCodeIndex <= -1) {
+            //Means that it is a fresh autoplay not a paused one. Reset indexes
+            mArrayWordsInStringIndex = 0
+            mArrayBrailleGridsForCharsInWordIndex = 0
+            mMorseCodeIndex = -1
+            tvMorseCode?.text = mArrayBrailleGridsForCharsInWord?.first()
+        }
         isAutoPlayOn = true
-        btnReplay?.visibility = View.VISIBLE
-        btnReplay?.text = "Stop Replay"
+        btnPlayPause?.visibility = View.VISIBLE
+        btnPlayPause?.setImageResource(R.drawable.pause_fill0_wght400_grad0_opsz48)
+        btnPlayPause?.contentDescription = "Pause Button"
         btnReset?.visibility = View.GONE
+        btnPreviousCharacter?.visibility = View.GONE
         btnNextCharacter?.visibility = View.GONE
         btnSwitchReadDirection?.visibility = View.GONE
         btnFullText?.visibility = View.GONE
@@ -625,56 +669,123 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         isRunnablePosted = true
     }
 
-    fun stopAutoplay() {
+    fun pauseAutoPlay() {
         isAutoPlayOn = false
         mainHandler.removeCallbacks(updateTextTask)
         isRunnablePosted = false
+    }
+
+    fun pauseAutoPlayAndReset() {
+        pauseAutoPlay()
         reset()
     }
 
-    fun goToNextCharacter() {
-        if (mInputAction != null) {
-            //This should only be allowed when reading morse code
-            //We have to be in reading mode
-            //we have to have morse code text
-            if (tvAlphanumerics.text.isNullOrBlank() == false && tvMorseCode.text.isNullOrBlank() == false) {
-                if (mMorseCodeIndex < 0)  {
-                    mMorseCodeIndex = 0
-                }
-                else if (mMorseCodeIndex < tvMorseCode.text.length) {
-                    mMorseCodeIndex++
-                }
-                else if (mMorseCodeIndex >= tvMorseCode.text.length) {
-                    if (arrayBrailleGridsForCharsInWordIndex < arrayBrailleGridsForCharsInWord?.size?.minus(1) ?: 0) {
-                        //move to next letter
-                        arrayBrailleGridsForCharsInWordIndex++
-                        tvMorseCode?.text = arrayBrailleGridsForCharsInWord?.get(arrayBrailleGridsForCharsInWordIndex)
-                        flashBrailleGridChange()
-                        mMorseCodeIndex = 0
-                    }
-                    else if (arrayWordsInStringIndex < (arrayWordsInString.size - 1)) {
-                        //we have reached the end of the word
-                        //move to the next word
-                        arrayWordsInStringIndex++
-                        mInputText = arrayWordsInString[arrayWordsInStringIndex]
-                        arrayBrailleGridsForCharsInWordIndex = 0
-                        arrayBrailleGridsForCharsInWord?.clear()
-                        arrayBrailleGridsForCharsInWord?.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
-                        tvAlphanumerics?.text = mInputText
-                        tvMorseCode?.text = arrayBrailleGridsForCharsInWord?.get(arrayBrailleGridsForCharsInWordIndex)
-                        flashAlphanumericLabelChange()
-                        flashBrailleGridChange()
-                        mMorseCodeIndex = 0
-                    }
-                }
-                mcScroll()
+    fun goToPreviousCharacter() {
+        if (tvAlphanumerics.text.isNullOrBlank() == false && tvMorseCode.text.isNullOrBlank() == false) {
+            if (mMorseCodeIndex >= (tvMorseCode.text.length - 1)
+                && mArrayBrailleGridsForCharsInWordIndex >= (mArrayBrailleGridsForCharsInWord.size - 1)
+                && mArrayWordsInStringIndex >= (mArrayWordsInString.size - 1)) {
+                val brailleString = tvMorseCode.text.toString()
+                mMorseCodeIndex = braille.getIndexInStringOfLastCharacterInTheGrid(brailleString)
+                mArrayBrailleGridsForCharsInWordIndex = mArrayBrailleGridsForCharsInWord.size - 1
+                mArrayWordsInStringIndex = mArrayWordsInString.size - 1
             }
-            else {
+            else if (mMorseCodeIndex <= -1
+                && mArrayBrailleGridsForCharsInWordIndex <= 0
+                && mArrayWordsInStringIndex <= 0) {
+                //Reached the very beginning of the string
                 (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
                     mContext,
-                    "RESULT_FAILURE"
-                )
+                    "RESULT_SUCCESS"
+                ) //Indicates there is nothing more here
+                removeHighlighting()
+                return
             }
+            else if (mMorseCodeIndex <= -1
+                && mArrayBrailleGridsForCharsInWordIndex <= 0) {
+                //we have reached the end of the word
+                //move to the previous word
+                mArrayWordsInStringIndex--
+                mInputText = mArrayWordsInString[mArrayWordsInStringIndex]
+                mArrayBrailleGridsForCharsInWord.clear()
+                mArrayBrailleGridsForCharsInWord.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
+                mArrayBrailleGridsForCharsInWordIndex = mArrayBrailleGridsForCharsInWord.size - 1
+                tvAlphanumerics?.text = mInputText
+                tvMorseCode?.text = mArrayBrailleGridsForCharsInWord[mArrayBrailleGridsForCharsInWordIndex]
+                flashAlphanumericLabelChange()
+                flashBrailleGridChange()
+                val brailleString = tvMorseCode.text.toString()
+                mMorseCodeIndex = braille.getIndexInStringOfLastCharacterInTheGrid(brailleString)
+            }
+            else if (mMorseCodeIndex <= -1) {
+                //move to next letter
+                mArrayBrailleGridsForCharsInWordIndex--
+                tvMorseCode?.text = mArrayBrailleGridsForCharsInWord[mArrayBrailleGridsForCharsInWordIndex]
+                flashBrailleGridChange()
+                val brailleString = tvMorseCode.text.toString()
+                mMorseCodeIndex = braille.getIndexInStringOfLastCharacterInTheGrid(brailleString)
+            }
+            mcScroll()
+        }
+        else {
+            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
+                mContext,
+                "RESULT_FAILURE"
+            )
+        }
+    }
+
+    fun goToNextCharacter() {
+        if (tvAlphanumerics.text.isNullOrBlank() == false && tvMorseCode.text.isNullOrBlank() == false) {
+            val brailleStringIndex = braille.getNextIndexForBrailleTraversal(tvMorseCode.text.length, mMorseCodeIndex, isBrailleSwitchedToHorizontal)
+
+            if (mMorseCodeIndex < 0
+                && mArrayBrailleGridsForCharsInWordIndex <= 0
+                && mArrayWordsInStringIndex <= 0)  {
+                if (isAutoPlayOn == false) btnReset?.visibility = View.VISIBLE
+                mMorseCodeIndex = 0
+                mArrayBrailleGridsForCharsInWordIndex = 0
+                mArrayWordsInStringIndex = 0
+            }
+            else if (brailleStringIndex == -1
+                && mArrayBrailleGridsForCharsInWordIndex >= (mArrayBrailleGridsForCharsInWord.size - 1)
+                && mArrayWordsInStringIndex >= (mArrayWordsInString.size - 1)) {
+                (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
+                    mContext,
+                    "RESULT_SUCCESS"
+                ) //Indicates there is nothing more here
+                removeHighlighting()
+                return
+            }
+            else if (brailleStringIndex == -1
+                && mArrayBrailleGridsForCharsInWordIndex >= (mArrayBrailleGridsForCharsInWord.size - 1)) {
+                //we have reached the end of the word
+                //move to the next word
+                mArrayWordsInStringIndex++
+                mInputText = mArrayWordsInString[mArrayWordsInStringIndex]
+                mArrayBrailleGridsForCharsInWordIndex = 0
+                mArrayBrailleGridsForCharsInWord.clear()
+                mArrayBrailleGridsForCharsInWord.addAll(braille.convertAlphanumericToBraille(mInputText ?: "") ?: ArrayList())
+                tvAlphanumerics?.text = mInputText
+                tvMorseCode?.text = mArrayBrailleGridsForCharsInWord.get(mArrayBrailleGridsForCharsInWordIndex)
+                flashAlphanumericLabelChange()
+                flashBrailleGridChange()
+                mMorseCodeIndex = 0
+            }
+            else if (brailleStringIndex == -1) {
+                //move to next character
+                mArrayBrailleGridsForCharsInWordIndex++
+                tvMorseCode?.text = mArrayBrailleGridsForCharsInWord[mArrayBrailleGridsForCharsInWordIndex]
+                flashBrailleGridChange()
+                mMorseCodeIndex = 0
+            }
+            mcScroll()
+        }
+        else {
+            (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
+                mContext,
+                "RESULT_FAILURE"
+            )
         }
     }
 
