@@ -483,6 +483,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         }   */
         CustomVibrationPatternsUtils.getInfoTextForBraille(morseCodeString.toString(), brailleStringIndex)?.let {
             flashVibrationDescription(it)
+            view?.announceForAccessibility(it)
         }
 
         //Highlighting alphanumeric portion
