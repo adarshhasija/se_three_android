@@ -130,7 +130,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
                 text += word
                 text += " "
             }
-            text = text.trim()
+            text = text.trim() //This is to trim the last space at the end of the last for loop above
             for (i in mArrayWordsInString.indices) {
                 if (i < mArrayWordsInStringIndex) {
                     startIndexForHighlighting += mArrayWordsInString[i].length //Need to increment by length of  the word that was completed
@@ -248,7 +248,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
                 }
             }
             it.getString(ARG_INPUT_TEXT)?.let {
-                mInputText = it
+                mInputText = it.trim()
             }
             return
         }

@@ -199,8 +199,8 @@ class Braille {
     }
 
     fun convertAlphanumericToBraille(alphanumericString : String) : ArrayList<String>? {
-        var brailleStringArray : ArrayList<String> = ArrayList()
-        var english = alphanumericString.uppercase().trim()
+        val brailleStringArray : ArrayList<String> = ArrayList()
+        var english = alphanumericString.uppercase()
         val re = Regex("[^A-Za-z0-9 ]")
         english = re.replace(english, "")
         english = english.replace(" +", " ")
