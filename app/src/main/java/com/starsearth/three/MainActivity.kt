@@ -333,9 +333,16 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun openActionFromActionScreen(action: String) {
-        if (action == "TIME" || action == "DATE" || action == "BATTERY_LEVEL") {
+        if (action == "TIME" || action == "BATTERY_LEVEL") {
             val actionFragment = ActionFragment.newInstance(action)
             openNewFragment(actionFragment, ActionFragment.TAG)
+        }
+        else if (action == "DATE") {
+            val calendar = Calendar.getInstance()
+            val date = calendar[Calendar.DATE]
+            val weekday_name: String = SimpleDateFormat("EEEE", Locale.ENGLISH).format(System.currentTimeMillis())
+            val final = date.toString() + " " + weekday_name //We want to say the full weekday name
+            openActionFromActionsListScreenWithManualInput(final)
         }
         else if (action == "CAMERA") {
             val intent = Intent(this, CameraActivity::class.java)

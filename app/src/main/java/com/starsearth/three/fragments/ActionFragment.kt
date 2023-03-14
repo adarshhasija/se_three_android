@@ -80,48 +80,6 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            it.getString(ARG_INPUT_ACTION)?.let {
-                if (it == "TIME") {
-                    mInputAction = Action.Companion.ROW_TYPE.TIME_12HR
-                }
-                else if (it == "DATE") {
-                    mInputAction = Action.Companion.ROW_TYPE.DATE
-                }
-                else if (it == "BATTERY_LEVEL") {
-                    mInputAction = Action.Companion.ROW_TYPE.BATTERY_LEVEL
-                }
-                else if (it == "MANUAL") {
-                    mInputAction = Action.Companion.ROW_TYPE.MANUAL
-                }
-            }
-            it.getString(ARG_INPUT_TEXT)?.let {
-                mInputText = it
-            }
-            return
-        }
-        //Should only reach here if there is no input action
-        setHasOptionsMenu(true)
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        try {
-            if (mView == null) {
-                // view will be initialize for the first time .. you can out condition for that if data is not null then do not initialize view again.
-                mView = inflater.inflate(R.layout.fragment_action, container, false)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        // Inflate the layout for this fragment
-        return mView//inflater.inflate(R.layout.fragment_action, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -270,6 +228,48 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         //if (tvMorseCode?.text?.isNullOrEmpty() == false) {
         //    autoPlay()
         //}
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            it.getString(ARG_INPUT_ACTION)?.let {
+                if (it == "TIME") {
+                    mInputAction = Action.Companion.ROW_TYPE.TIME_12HR
+                }
+                else if (it == "DATE") {
+                    mInputAction = Action.Companion.ROW_TYPE.DATE
+                }
+                else if (it == "BATTERY_LEVEL") {
+                    mInputAction = Action.Companion.ROW_TYPE.BATTERY_LEVEL
+                }
+                else if (it == "MANUAL") {
+                    mInputAction = Action.Companion.ROW_TYPE.MANUAL
+                }
+            }
+            it.getString(ARG_INPUT_TEXT)?.let {
+                mInputText = it
+            }
+            return
+        }
+        //Should only reach here if there is no input action
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        try {
+            if (mView == null) {
+                // view will be initialize for the first time .. you can out condition for that if data is not null then do not initialize view again.
+                mView = inflater.inflate(R.layout.fragment_action, container, false)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        // Inflate the layout for this fragment
+        return mView//inflater.inflate(R.layout.fragment_action, container, false)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

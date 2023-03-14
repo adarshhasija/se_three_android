@@ -56,7 +56,7 @@ class ActionListFragment : Fragment() {
                 val action1 = Action("Time", "12 hour format", Action.Companion.ROW_TYPE.TIME_12HR)
                 //actionList.add(action1)
                 val action2 = Action("Date", "Date and day of the week", Action.Companion.ROW_TYPE.DATE)
-                //actionList.add(action2)
+                actionList.add(action2)
                 val action3 = Action("Battery Level", "Of this device as a percentage", Action.Companion.ROW_TYPE.BATTERY_LEVEL)
                 //actionList.add(action3)
                 val action4 = Action("Manual", "Enter letters or numbers are we will convert it into braille and play it as vibrations", Action.Companion.ROW_TYPE.MANUAL)
