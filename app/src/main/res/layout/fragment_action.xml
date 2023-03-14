@@ -55,6 +55,7 @@
                     android:id="@+id/btnPlayPause"
                     android:background="#000000FF"
                     android:src="@drawable/play_arrow_fill0_wght400_grad0_opsz48"
+                    android:contentDescription="Play Button"
                     android:tint="#0000FF"
                     android:paddingTop="10dp"
                     android:layout_width="wrap_content"
@@ -109,6 +110,7 @@
 
         <Button
                 android:id="@+id/btnReset"
+                android:visibility="gone"
                 android:background="#00FF0000"
                 android:textColor="#FF0000"
                 android:text="RESET"
