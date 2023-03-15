@@ -158,8 +158,7 @@ class MainActivity : AppCompatActivity(),
 
     private fun handSendText(intent: Intent) {
         intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-            val actionFragment : Fragment = ActionFragment.newInstance("MANUAL", it)
-            openNewFragment(actionFragment, ActionFragment.TAG)
+            openActionFromActionScreenManualInput("MANUAL", it)
         }
     }
 
@@ -355,10 +354,13 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun openActionFromActionScreenManualInput(action: String, inputText: String) {
-        if (action == "MANUAL") {
-            val actionFragment = ActionFragment.newInstance(action, inputText)
-            openNewFragment(actionFragment, ActionFragment.TAG)
-        }
+        val re = Regex("[^A-Za-z0-9\n ]")
+        var filteredInputText = re.replace(inputText, "")
+        filteredInputText = filteredInputText.replace("\\s+".toRegex(), " ") //multiple spaces between charaacters
+        filteredInputText = filteredInputText.replace("\\n+".toRegex(), " ") //newlines.
+        //filteredInputText = filteredInputText.replace(" ", "␣", true)
+        val actionFragment = ActionFragment.newInstance(action, filteredInputText)
+        openNewFragment(actionFragment, ActionFragment.TAG)
     }
 
     override fun openDialogForManualEntryFromActionFragment() {
