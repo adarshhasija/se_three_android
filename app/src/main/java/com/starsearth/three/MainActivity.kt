@@ -351,6 +351,10 @@ class MainActivity : AppCompatActivity(),
             val chatModeFragment = ChatModeFragment.newInstance("","")
             openNewFragment(chatModeFragment, ChatModeFragment.TAG)
         }
+        else if (action == "SETTINGS") {
+            val settingsFragment = SettingsFragment.newInstance()
+            openNewFragment(settingsFragment, SettingsFragment.TAG)
+        }
     }
 
     override fun openActionFromActionScreenManualInput(action: String, inputText: String) {

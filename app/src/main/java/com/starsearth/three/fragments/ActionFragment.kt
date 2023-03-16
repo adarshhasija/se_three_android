@@ -56,6 +56,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     var mArrayWordsInStringIndex : Int = 0
     var braille = Braille()
     var isBrailleSwitchedToHorizontal = false
+    var TIME_DIFF_MILLIS : Long = 1000
 
     lateinit var mainHandler: Handler
     var isRunnablePosted = false
@@ -76,7 +77,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             }
             mMorseCodeIndex++
             goToNextCharacter()
-            mainHandler.postDelayed(this, 1000)
+            mainHandler.postDelayed(this, TIME_DIFF_MILLIS)
         }
     }
 
@@ -223,6 +224,9 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         }
 
         view.setOnTouchListener(SeOnTouchListener(this))
+
+        val preferences = context!!.getSharedPreferences("SE_THREE", Context.MODE_PRIVATE)
+        TIME_DIFF_MILLIS = preferences.getLong(CustomVibrationPatternsUtils.STRING_FOR_SHARED_PREFERENCES, 1000)
 
         //TimeUnit.SECONDS.sleep(1);
         //if (tvMorseCode?.text?.isNullOrEmpty() == false) {
@@ -655,7 +659,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             mArrayWordsInStringIndex = 0
             mArrayBrailleGridsForCharsInWordIndex = 0
             mMorseCodeIndex = -1
-            tvMorseCode?.text = mArrayBrailleGridsForCharsInWord?.first()
+            tvMorseCode?.text = mArrayBrailleGridsForCharsInWord.first()
         }
         isAutoPlayOn = true
         btnPlayPause?.visibility = View.VISIBLE

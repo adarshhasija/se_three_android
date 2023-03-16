@@ -11,6 +11,8 @@ class CustomVibrationPatternsUtils {
 
     companion object {
 
+        val STRING_FOR_SHARED_PREFERENCES = "SE_THREE_ANDROID_AUTOPLAY_TIME_DIFF"
+
         fun getCurrentTimeInDotsDashes() : HashMap<String,Any> {
             val calendar = Calendar.getInstance()
             val hh =

@@ -87,7 +87,7 @@ class ActionListFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        //inflater.inflate(R.menu.fragment_action, menu) //Uncomment this line if you need the actions here. As of now we dont need it in the overflow menu as we are putting it in the main list
+        inflater.inflate(R.menu.fragment_action_list, menu) //Uncomment this line if you need the actions here. As of now we dont need it in the overflow menu as we are putting it in the main list
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -107,6 +107,10 @@ class ActionListFragment : Fragment() {
         }
         if (id == R.id.action_deaf) {
             mListener?.openActionFromActionsListScreen("CHAT_MODE")
+            return true;
+        }
+        if (id == R.id.action_settings) {
+            mListener?.openActionFromActionsListScreen("SETTINGS")
             return true;
         }
 
