@@ -124,16 +124,16 @@ class Braille {
         array.add(BrailleCell("x", "1346"))
         array.add(BrailleCell("y", "13456"))
         array.add(BrailleCell("z", "1356"))
-        array.add(BrailleCell("1", "3456 1"))
-        array.add(BrailleCell("2", "3456 12"))
-        array.add(BrailleCell("3", "3456 14"))
-        array.add(BrailleCell("4", "3456 145"))
-        array.add(BrailleCell("5", "3456 15"))
-        array.add(BrailleCell("6", "3456 124"))
-        array.add(BrailleCell("7", "3456 1245"))
-        array.add(BrailleCell("8", "3456 125"))
-        array.add(BrailleCell("9", "3456 24"))
-        array.add(BrailleCell("0", "3456 245"))
+        array.add(BrailleCell("1", "1")) //3456 will be added at a code level
+        array.add(BrailleCell("2", "12"))
+        array.add(BrailleCell("3", "14"))
+        array.add(BrailleCell("4", "145"))
+        array.add(BrailleCell("5", "15"))
+        array.add(BrailleCell("6", "124"))
+        array.add(BrailleCell("7", "1245"))
+        array.add(BrailleCell("8", "125"))
+        array.add(BrailleCell("9", "24"))
+        array.add(BrailleCell("0", "245"))
         array.add(BrailleCell(",", "2"))
         array.add(BrailleCell(";", "23"))
         array.add(BrailleCell(":", "25"))
@@ -201,12 +201,18 @@ class Braille {
     fun convertAlphanumericToBraille(alphanumericString : String) : ArrayList<String>? {
         val brailleStringArray : ArrayList<String> = ArrayList()
         var brailleCharacterString = ""
+        var index = -1
         for (character in alphanumericString) {
+            index++
             var brailleDotsString : String? = alphabetToBrailleDictionary[(Character.toString(character)).lowercase()]
             if (brailleDotsString == null) {
                 return null
             }
-            if (character.isUpperCase()) { brailleDotsString = "6 " + brailleCharacterString }
+            if (character.isUpperCase()) { brailleDotsString = "6 " + brailleDotsString }
+            if ((alphanumericString.toIntOrNull() != null && index == 0)
+                || (alphanumericString.toIntOrNull() == null && character.isDigit())) {
+                    brailleDotsString = "3456 " + brailleDotsString
+            }
             val brailleDotsArray = brailleDotsString.split("\\s".toRegex()).toTypedArray() //if its for a number its 2 braille grids
             if (brailleDotsArray.size > 1) {
                 //means its a number, and it needs 2 braille grids
