@@ -98,32 +98,32 @@ class Braille {
 
 
     fun populate() {
-        array.add(BrailleCell("A", "1"))
-        array.add(BrailleCell("B", "12"))
-        array.add(BrailleCell("C", "14"))
-        array.add(BrailleCell("D", "145"))
-        array.add(BrailleCell("E", "15"))
-        array.add(BrailleCell("F", "124"))
-        array.add(BrailleCell("G", "1245"))
-        array.add(BrailleCell("H", "125"))
-        array.add(BrailleCell("I", "24"))
-        array.add(BrailleCell("J", "245"))
-        array.add(BrailleCell("K", "13"))
-        array.add(BrailleCell("L", "123"))
-        array.add(BrailleCell("M", "134"))
-        array.add(BrailleCell("N", "1345"))
-        array.add(BrailleCell("O", "135"))
-        array.add(BrailleCell("P", "1234"))
-        array.add(BrailleCell("Q", "12345"))
-        array.add(BrailleCell("R", "1235"))
-        array.add(BrailleCell("S", "234"))
-        array.add(BrailleCell("T", "2345"))
-        array.add(BrailleCell("U", "136"))
-        array.add(BrailleCell("V", "1236"))
-        array.add(BrailleCell("W", "2456"))
-        array.add(BrailleCell("X", "1346"))
-        array.add(BrailleCell("Y", "13456"))
-        array.add(BrailleCell("Z", "1356"))
+        array.add(BrailleCell("a", "1"))
+        array.add(BrailleCell("b", "12"))
+        array.add(BrailleCell("c", "14"))
+        array.add(BrailleCell("d", "145"))
+        array.add(BrailleCell("e", "15"))
+        array.add(BrailleCell("f", "124"))
+        array.add(BrailleCell("g", "1245"))
+        array.add(BrailleCell("h", "125"))
+        array.add(BrailleCell("i", "24"))
+        array.add(BrailleCell("j", "245"))
+        array.add(BrailleCell("k", "13"))
+        array.add(BrailleCell("l", "123"))
+        array.add(BrailleCell("m", "134"))
+        array.add(BrailleCell("n", "1345"))
+        array.add(BrailleCell("o", "135"))
+        array.add(BrailleCell("p", "1234"))
+        array.add(BrailleCell("q", "12345"))
+        array.add(BrailleCell("r", "1235"))
+        array.add(BrailleCell("s", "234"))
+        array.add(BrailleCell("t", "2345"))
+        array.add(BrailleCell("u", "136"))
+        array.add(BrailleCell("v", "1236"))
+        array.add(BrailleCell("w", "2456"))
+        array.add(BrailleCell("x", "1346"))
+        array.add(BrailleCell("y", "13456"))
+        array.add(BrailleCell("z", "1356"))
         array.add(BrailleCell("1", "3456 1"))
         array.add(BrailleCell("2", "3456 12"))
         array.add(BrailleCell("3", "3456 14"))
@@ -200,13 +200,13 @@ class Braille {
 
     fun convertAlphanumericToBraille(alphanumericString : String) : ArrayList<String>? {
         val brailleStringArray : ArrayList<String> = ArrayList()
-        var english = alphanumericString.uppercase()
         var brailleCharacterString = ""
-        for (character in english) {
-            val brailleDotsString : String? = alphabetToBrailleDictionary[Character.toString(character)]
+        for (character in alphanumericString) {
+            var brailleDotsString : String? = alphabetToBrailleDictionary[(Character.toString(character)).lowercase()]
             if (brailleDotsString == null) {
                 return null
             }
+            if (character.isUpperCase()) { brailleDotsString = "6 " + brailleCharacterString }
             val brailleDotsArray = brailleDotsString.split("\\s".toRegex()).toTypedArray() //if its for a number its 2 braille grids
             if (brailleDotsArray.size > 1) {
                 //means its a number, and it needs 2 braille grids

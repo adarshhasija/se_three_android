@@ -93,7 +93,9 @@ class SettingsFragment : Fragment() {
         val secs = ((TIME_DIFF_MILLIS/1000)%60)
         val minsString = if (mins > 0) { mins.toString() + "m" } else { "" }
         val secsString = if (secs > 0) { secs.toString() + "s" } else { "" }
-        tvTime?.text = minsString + " " + secsString
+        val finalString = minsString + " " + secsString
+        view?.announceForAccessibility(finalString)
+        tvTime?.text = finalString
     }
 
     companion object {
