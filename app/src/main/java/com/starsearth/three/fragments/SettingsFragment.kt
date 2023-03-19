@@ -10,6 +10,7 @@ import com.starsearth.three.R
 import com.starsearth.three.application.StarsEarthApplication
 import com.starsearth.three.utils.CustomVibrationPatternsUtils
 import kotlinx.android.synthetic.main.fragment_settings.*
+import java.util.concurrent.TimeUnit
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -49,10 +50,11 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         btnMinus?.setOnClickListener {
-            if (TIME_DIFF_MILLIS <= 1000) {
+            if (TIME_DIFF_MILLIS <= 500) {
                 context?.let {
                     (it.applicationContext as? StarsEarthApplication)?.vibrate(it, "RESULT_FAILURE")
                 }
+                tvError?.text = "Timer cannot go lower"
                 tvError?.visibility = View.VISIBLE
                 view.announceForAccessibility(tvError.text)
                 return@setOnClickListener
@@ -61,7 +63,7 @@ class SettingsFragment : Fragment() {
                 (it.applicationContext as? StarsEarthApplication)?.vibrate(it, "MC_DOT")
             }
             tvError?.visibility = View.GONE
-            TIME_DIFF_MILLIS -= 1000
+            TIME_DIFF_MILLIS -= 500
             setTimeLabel()
             val preferences = context!!.getSharedPreferences("SE_THREE", Context.MODE_PRIVATE)
             val editor = preferences.edit()
@@ -70,11 +72,20 @@ class SettingsFragment : Fragment() {
         }
 
         btnAdd?.setOnClickListener {
+            if (TIME_DIFF_MILLIS >= 2000) {
+                context?.let {
+                    (it.applicationContext as? StarsEarthApplication)?.vibrate(it, "RESULT_FAILURE")
+                }
+                tvError?.text = "Timer cannot go higher"
+                tvError?.visibility = View.VISIBLE
+                view.announceForAccessibility(tvError.text)
+                return@setOnClickListener
+            }
             context?.let {
                 (it.applicationContext as? StarsEarthApplication)?.vibrate(it, "MC_DOT")
             }
             tvError?.visibility = View.GONE
-            TIME_DIFF_MILLIS += 1000
+            TIME_DIFF_MILLIS += 500
             setTimeLabel()
             val preferences = context!!.getSharedPreferences("SE_THREE", Context.MODE_PRIVATE)
             val editor = preferences.edit()
@@ -91,9 +102,9 @@ class SettingsFragment : Fragment() {
     private fun setTimeLabel() {
         val mins = ((TIME_DIFF_MILLIS/1000)/60)
         val secs = ((TIME_DIFF_MILLIS/1000)%60)
-        val minsString = if (mins > 0) { mins.toString() + "m" } else { "" }
-        val secsString = if (secs > 0) { secs.toString() + "s" } else { "" }
-        val finalString = minsString + " " + secsString
+        val millis = TIME_DIFF_MILLIS % 1000
+        val secsString = secs.toString() + (if (millis > 0) { ".5" } else { "" }) + "s"
+        val finalString = secsString
         view?.announceForAccessibility(finalString)
         tvTime?.text = finalString
     }

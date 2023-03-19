@@ -72,9 +72,9 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
                 pauseAutoPlayAndReset()
                 return
             }
-            if (braille.isMidpointReachedForNumber(tvMorseCode.text.length, brailleStringIndex)) {
+         /*   if (braille.isMidpointReachedForNumber(tvMorseCode.text.length, brailleStringIndex)) {
                 TimeUnit.MILLISECONDS.sleep(250)
-            }
+            }*/
             mMorseCodeIndex++
             goToNextCharacter()
             mainHandler.postDelayed(this, TIME_DIFF_MILLIS)
@@ -766,6 +766,9 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
                 && mArrayBrailleGridsForCharsInWordIndex >= (mArrayBrailleGridsForCharsInWord.size - 1)) {
                 //we have reached the end of the word
                 //move to the next word
+                if (isAutoPlayOn == true) {
+                    TimeUnit.MILLISECONDS.sleep(TIME_DIFF_MILLIS/4 /*250*/)
+                }
                 mArrayWordsInStringIndex++
                 mInputText = mArrayWordsInString[mArrayWordsInStringIndex]
                 mArrayBrailleGridsForCharsInWordIndex = 0
