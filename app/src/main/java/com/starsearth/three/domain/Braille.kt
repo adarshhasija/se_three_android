@@ -1,8 +1,9 @@
 package com.starsearth.three.domain
 
+import android.util.Log
+
 class Braille {
 
-    var array: ArrayList<BrailleCell> = ArrayList<BrailleCell>()
     var alphabetToBrailleDictionary : HashMap<String, String> = HashMap()
 
     //Braille grid
@@ -98,6 +99,7 @@ class Braille {
 
 
     fun populate() {
+        var array: ArrayList<BrailleCell> = ArrayList() //only keeping these array adds to retain syntax so we dont have  to  type it again
         array.add(BrailleCell("a", "1"))
         array.add(BrailleCell("b", "12"))
         array.add(BrailleCell("c", "14"))
@@ -134,17 +136,23 @@ class Braille {
         array.add(BrailleCell("8", "125"))
         array.add(BrailleCell("9", "24"))
         array.add(BrailleCell("0", "245"))
+        array.add(BrailleCell("#", "3456"))
+        array.add(BrailleCell("^", "6"))
         array.add(BrailleCell(",", "2"))
         array.add(BrailleCell(";", "23"))
         array.add(BrailleCell(":", "25"))
         array.add(BrailleCell("?", "26"))
         array.add(BrailleCell("!", "235"))
         array.add(BrailleCell("-", "36"))
+        array.add(BrailleCell("can", "14"))
+        array.add(BrailleCell("ing", "346"))
+        array.add(BrailleCell("com", "36"))
 
         //Dunno why  we doing it this way but we keep it like this for now
         for (brailleCell in array) {
             alphabetToBrailleDictionary[brailleCell.english] = brailleCell.brailleDots
         }
+        array.clear() //Dont want it to take memory. It will be garbage collected anyway
     }
 
     fun getNextIndexForBrailleTraversal(brailleStringLength: Int, currentIndex : Int, isDirectionHorizontal : Boolean) : Int {
@@ -250,6 +258,88 @@ class Braille {
         }
 
         return brailleStringArray
+    }
+
+    fun convertAlphanumericToBrailleWithContractions(alphanumericString : String) : ArrayList<BrailleCell> {
+        val brailleFinalArray : ArrayList<BrailleCell> = ArrayList()
+        var brailleCharacterString = ""
+        var isFirstNumberSubstringPassed = false
+        var substring = ""
+        var brailleDotsString = ""
+        var mainStringIndex = -1
+        for (startIndex in 0 until alphanumericString.length) {
+            mainStringIndex =
+                if (mainStringIndex > startIndex) {
+                    mainStringIndex
+                }
+                else {
+                    startIndex
+                }
+            if (mainStringIndex >= alphanumericString.length) {
+                break
+            }
+            for (endIndex in alphanumericString.lastIndex downTo mainStringIndex) {
+                substring = alphanumericString.subSequence(mainStringIndex, endIndex+1).toString() //The endIndex is not inclusive in this function. We get a substring till the index before endIndex
+                brailleDotsString = alphabetToBrailleDictionary[substring.lowercase()] ?: ""
+                if (brailleDotsString.isBlank() == false) {
+                    mainStringIndex += substring.length
+                    break
+                }
+            }
+            if (substring.length == 1) {
+                if ((substring.first()).isUpperCase()) { brailleDotsString = alphabetToBrailleDictionary["^"] + " " + brailleDotsString }
+                if ((substring.first()).isDigit() && isFirstNumberSubstringPassed == false) {
+                    //standalone number OR first number in a sequence
+                    brailleDotsString = alphabetToBrailleDictionary["#"] + " " + brailleDotsString
+                    isFirstNumberSubstringPassed = true
+                }
+                else if ((substring.first()).isDigit() == false) {
+                    //a letter or special character
+                    isFirstNumberSubstringPassed = false
+                }
+            }
+            else {
+                //its a long string. a contraction. likely not a number
+                isFirstNumberSubstringPassed = false
+            }
+
+            val brailleDotsArray = brailleDotsString.split("\\s".toRegex()).toTypedArray() //if its for a number its 2 braille grids
+            if (brailleDotsArray.size > 1) {
+                //means its a number, and it needs 2 braille grids
+                brailleCharacterString = "xx xx\nxx xx\nxx xx"
+            }
+            else {
+                brailleCharacterString = "xx\nxx\nxx"
+            }
+            if (brailleDotsArray.size > 1) {
+                for (number in brailleDotsArray[0]) {
+                    val numberAsInt = number.digitToInt()
+                    val index : Int = mappingBrailleGridNumbersToStringIndex[numberAsInt]!!
+                    val chars = brailleCharacterString.toCharArray()
+                    chars[index] = 'o'
+                    brailleCharacterString = String(chars)
+                }
+                for (number in brailleDotsArray[1]) {
+                    val numberAsInt = number.digitToInt()
+                    val index : Int = mappingBrailleGridNumbersToStringIndex[numberAsInt + 6]!!
+                    val chars = brailleCharacterString.toCharArray()
+                    chars[index] = 'o'
+                    brailleCharacterString = String(chars)
+                }
+            }
+            else {
+                for (number in brailleDotsArray[0]) {
+                    val numberAsInt = number.digitToInt()
+                    val index : Int = mappingBrailleGridToStringIndex[numberAsInt]!!
+                    val chars = brailleCharacterString.toCharArray()
+                    chars[index] = 'o'
+                    brailleCharacterString = String(chars)
+                }
+            }
+            brailleFinalArray.add(BrailleCell(substring, brailleCharacterString))
+        }
+
+        return brailleFinalArray
     }
 
     fun getIndexInStringOfLastCharacterInTheGrid(brailleStringForCharacter: String) : Int {
