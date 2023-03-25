@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.AudioManager
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
@@ -27,6 +28,7 @@ import com.starsearth.three.fragments.lists.ActionListFragment
 import com.starsearth.three.fragments.lists.ChatListItemFragment
 import com.starsearth.three.managers.AnalyticsManager
 import kotlinx.android.synthetic.main.fragment_chat_mode.*
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -332,9 +334,14 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun openActionFromActionScreen(action: String) {
-        if (action == "TIME" || action == "BATTERY_LEVEL") {
+      /*  if (action == "TIME" || action == "BATTERY_LEVEL") {
             val actionFragment = ActionFragment.newInstance(action)
             openNewFragment(actionFragment, ActionFragment.TAG)
+        }*/
+        if (action == "TIME") {
+            val dateFormat: DateFormat = SimpleDateFormat("hh:mm aa")
+            val timeString: String = dateFormat.format(Date()).toString()
+            openActionFromActionsListScreenWithManualInput(timeString)
         }
         else if (action == "DATE") {
             val calendar = Calendar.getInstance()
@@ -342,6 +349,11 @@ class MainActivity : AppCompatActivity(),
             val weekday_name: String = SimpleDateFormat("EEEE", Locale.ENGLISH).format(System.currentTimeMillis())
             val final = date.toString() + " " + weekday_name //We want to say the full weekday name
             openActionFromActionsListScreenWithManualInput(final)
+        }
+        else if (action == "BATTERY_LEVEL") {
+            val bm = getSystemService(BATTERY_SERVICE) as BatteryManager
+            val batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY).toString() //+ "%"
+            openActionFromActionsListScreenWithManualInput(batLevel)
         }
         else if (action == "CAMERA") {
             val intent = Intent(this, CameraActivity::class.java)

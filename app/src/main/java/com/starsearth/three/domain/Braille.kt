@@ -1,10 +1,36 @@
 package com.starsearth.three.domain
 
-import android.util.Log
+import kotlinx.android.synthetic.main.fragment_action.*
 
 class Braille {
 
+    //Keeping all travsal related indexes here in case we have a wearable version in future
+    var mArrayBrailleGridsForCharsInWord : java.util.ArrayList<BrailleCell> = java.util.ArrayList()
+    var mArrayWordsInString : java.util.ArrayList<String> = java.util.ArrayList()
+    var mArrayWordsInStringIndex : Int = 0
+    var mArrayBrailleGridsForCharsInWordIndex = 0 //in the case of braille
+    var mIndex = -1
+    var mAlphanumericHighlightStartIndex = 0 //Cannot use braille grids array index as thats not a 1-1 relation
+
     var alphabetToBrailleDictionary : HashMap<String, String> = HashMap()
+
+    fun reset() {
+        resetIndexes()
+        //tvMorseCode reset
+        resetBrailleGridArray()
+    }
+
+    fun resetIndexes() {
+        mArrayWordsInStringIndex = 0
+        mArrayBrailleGridsForCharsInWordIndex = 0
+        mIndex = -1
+        mAlphanumericHighlightStartIndex = 0
+    }
+
+    fun resetBrailleGridArray() {
+        mArrayBrailleGridsForCharsInWord.clear()
+        mArrayBrailleGridsForCharsInWord.addAll(convertAlphanumericToBrailleWithContractions(mArrayWordsInString.first()))
+    }
 
     //Braille grid
     //1 4
@@ -206,60 +232,6 @@ class Braille {
         return false
     }
 
-    fun convertAlphanumericToBraille(alphanumericString : String) : ArrayList<String>? {
-        val brailleStringArray : ArrayList<String> = ArrayList()
-        var brailleCharacterString = ""
-        var index = -1
-        for (character in alphanumericString) {
-            index++
-            var brailleDotsString : String? = alphabetToBrailleDictionary[(Character.toString(character)).lowercase()]
-            if (brailleDotsString == null) {
-                return null
-            }
-            if (character.isUpperCase()) { brailleDotsString = "6 " + brailleDotsString }
-            if ((alphanumericString.toIntOrNull() != null && index == 0)
-                || (alphanumericString.toIntOrNull() == null && character.isDigit())) {
-                    brailleDotsString = "3456 " + brailleDotsString
-            }
-            val brailleDotsArray = brailleDotsString.split("\\s".toRegex()).toTypedArray() //if its for a number its 2 braille grids
-            if (brailleDotsArray.size > 1) {
-                //means its a number, and it needs 2 braille grids
-                brailleCharacterString = "xx xx\nxx xx\nxx xx"
-            }
-            else {
-                brailleCharacterString = "xx\nxx\nxx"
-            }
-            if (brailleDotsArray.size > 1) {
-                for (number in brailleDotsArray[0]) {
-                    val numberAsInt = number.digitToInt()
-                    val index : Int = mappingBrailleGridNumbersToStringIndex[numberAsInt]!!
-                    val chars = brailleCharacterString.toCharArray()
-                    chars[index] = 'o'
-                    brailleCharacterString = String(chars)
-                }
-                for (number in brailleDotsArray[1]) {
-                    val numberAsInt = number.digitToInt()
-                    val index : Int = mappingBrailleGridNumbersToStringIndex[numberAsInt + 6]!!
-                    val chars = brailleCharacterString.toCharArray()
-                    chars[index] = 'o'
-                    brailleCharacterString = String(chars)
-                }
-            }
-            else {
-                for (number in brailleDotsArray[0]) {
-                    val numberAsInt = number.digitToInt()
-                    val index : Int = mappingBrailleGridToStringIndex[numberAsInt]!!
-                    val chars = brailleCharacterString.toCharArray()
-                    chars[index] = 'o'
-                    brailleCharacterString = String(chars)
-                }
-            }
-            brailleStringArray.add(brailleCharacterString)
-        }
-
-        return brailleStringArray
-    }
-
     fun convertAlphanumericToBrailleWithContractions(alphanumericString : String) : ArrayList<BrailleCell> {
         val brailleFinalArray : ArrayList<BrailleCell> = ArrayList()
         var brailleCharacterString = ""
@@ -349,6 +321,131 @@ class Braille {
         else {
             return 5 //as per brailleIndexOrderForVerticalReading and brailleIndexOrderForHorizontalReading, this is the key of the last elemment in the grid
         }
+    }
+
+
+
+    fun isEndOfEntireTextReached(brailleStringIndex: Int) : Boolean {
+        if (mIndex > 0 && brailleStringIndex == -1 //This combination means we are looking at the ending of the braille grid, not the start
+            && mArrayBrailleGridsForCharsInWordIndex >= (mArrayBrailleGridsForCharsInWord.size - 1)
+            && mArrayWordsInStringIndex >= (mArrayWordsInString.size - 1)) {
+            return true
+        }
+        return false
+    }
+
+    fun isPositionBehindText() : Boolean {
+        if (mIndex < 0
+            && mArrayBrailleGridsForCharsInWordIndex <= 0
+            && mArrayWordsInStringIndex <= 0) {
+            return true
+        }
+        return false
+    }
+
+    fun isStartOfWordReachedWhileMovingBack() : Boolean {
+        if (mIndex <= -1
+            && mArrayBrailleGridsForCharsInWordIndex <= 0) {
+            return true
+        }
+        return false
+    }
+
+    fun isEndOfWordReachedWhileMovingForward(brailleStringIndex: Int) : Boolean {
+        if (mIndex > -1 && brailleStringIndex == -1 //Indicates we are looking at the end of the array. index is 0 or more and brailleStringIndex is invalid
+            && mArrayBrailleGridsForCharsInWordIndex >= (mArrayBrailleGridsForCharsInWord.size - 1)) {
+            return true
+        }
+        return false
+    }
+
+    fun setIndexesForEndOfStringEndOfBrailleGrid(alphanumericString: String, brailleString: String) {
+        mIndex = getIndexInStringOfLastCharacterInTheGrid(brailleString)
+        mArrayBrailleGridsForCharsInWordIndex = mArrayBrailleGridsForCharsInWord.size - 1
+        mArrayWordsInStringIndex = mArrayWordsInString.size - 1
+        val exactWord = mArrayBrailleGridsForCharsInWord[mArrayBrailleGridsForCharsInWordIndex].english
+        mAlphanumericHighlightStartIndex = alphanumericString.length - exactWord.length
+    }
+
+    fun goToPreviousWord(brailleString: String) : String {
+        mArrayWordsInStringIndex--
+        val alphanumericString = mArrayWordsInString[mArrayWordsInStringIndex]
+        mArrayBrailleGridsForCharsInWord.clear()
+        mArrayBrailleGridsForCharsInWord.addAll(convertAlphanumericToBrailleWithContractions(alphanumericString))
+        mArrayBrailleGridsForCharsInWordIndex = mArrayBrailleGridsForCharsInWord.size - 1
+        //tvAlphanumerics?.text = mInputText
+        //tvBraille?.text = mArrayBrailleGridsForCharsInWord[mArrayBrailleGridsForCharsInWordIndex].brailleDots
+        //flashAlphanumericLabelChange()
+        //flashBrailleGridChange()
+        //val brailleString = tvBraille.text.toString()
+        mIndex = getIndexInStringOfLastCharacterInTheGrid(brailleString)
+        val exactWord = mArrayBrailleGridsForCharsInWord[mArrayBrailleGridsForCharsInWordIndex].english
+        mAlphanumericHighlightStartIndex = alphanumericString.length - exactWord.length
+
+        return alphanumericString
+    }
+
+    fun goToNextWord() : String {
+        mArrayWordsInStringIndex++
+        val alphanumericString = mArrayWordsInString[mArrayWordsInStringIndex]
+        mArrayBrailleGridsForCharsInWordIndex = 0
+        mArrayBrailleGridsForCharsInWord.clear()
+        mArrayBrailleGridsForCharsInWord.addAll(convertAlphanumericToBrailleWithContractions(alphanumericString))
+        mIndex = 0
+        mAlphanumericHighlightStartIndex = 0
+
+        return alphanumericString
+    }
+
+    fun goToPreviousCharacter(brailleString: String) {
+        mArrayBrailleGridsForCharsInWordIndex--
+        val exactWord = mArrayBrailleGridsForCharsInWord[mArrayBrailleGridsForCharsInWordIndex].english
+        mAlphanumericHighlightStartIndex -= exactWord.length
+        mIndex = getIndexInStringOfLastCharacterInTheGrid(brailleString)
+    }
+
+    fun goToNextCharacter() {
+        val exactWord = mArrayBrailleGridsForCharsInWord[mArrayBrailleGridsForCharsInWordIndex].english
+        mAlphanumericHighlightStartIndex += exactWord.length
+
+        //move to next character
+        mArrayBrailleGridsForCharsInWordIndex++
+        mIndex = 0
+        //tvBraille?.text = mArrayBrailleGridsForCharsInWord[mArrayBrailleGridsForCharsInWordIndex].brailleDots
+        //flashBrailleGridChange()
+    }
+
+    fun getStartAndEndIndexInFullStringOfHighlightedPortion() : HashMap<String, Any> {
+        var text = ""
+        var startIndexForHighlighting = 0
+        var endIndexForHighlighting = 0
+        for (word in mArrayWordsInString) {
+            text += word
+            text += " "
+        }
+        text = text.trim() //This is to trim the last space at the end of the last for loop above
+        for (i in mArrayWordsInString.indices) {
+            if (i < mArrayWordsInStringIndex) {
+                startIndexForHighlighting += mArrayWordsInString[i].length //Need to increment by length of  the word that was completed
+                startIndexForHighlighting++ //account for space after the word
+            }
+        }
+        startIndexForHighlighting += mAlphanumericHighlightStartIndex //account for exactly where we are in the word
+        val exactWord = mArrayBrailleGridsForCharsInWord[mArrayBrailleGridsForCharsInWordIndex].english
+        endIndexForHighlighting = if (mIndex > -1) {
+            //Means we have started traversing and there is something to highlight
+            startIndexForHighlighting + exactWord.length
+        }
+        else {
+            startIndexForHighlighting
+        }
+
+        val returnMap = HashMap<String, Any>()
+        returnMap["text"] = text
+        returnMap["start_index"] = startIndexForHighlighting
+        returnMap["end_index"] = endIndexForHighlighting
+
+        return returnMap
     }
 
 }

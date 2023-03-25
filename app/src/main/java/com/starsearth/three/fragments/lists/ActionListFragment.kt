@@ -54,15 +54,15 @@ class ActionListFragment : Fragment() {
 
                 val actionList = ArrayList<Action>()
                 val action1 = Action("Time", "12 hour format", Action.Companion.ROW_TYPE.TIME_12HR)
-                //actionList.add(action1)
+                actionList.add(action1)
                 val action2 = Action("Date", "Date and day of the week", Action.Companion.ROW_TYPE.DATE)
                 actionList.add(action2)
                 val action3 = Action("Battery Level", "Of this device as a percentage", Action.Companion.ROW_TYPE.BATTERY_LEVEL)
-                //actionList.add(action3)
+                actionList.add(action3)
                 val action4 = Action("Manual", "Enter letters or numbers are we will convert it into braille and play it as vibrations", Action.Companion.ROW_TYPE.MANUAL)
                 actionList.add(action4)
                 val action5 = Action("Camera", "Want to read a sign like a flat number? Point the camera at a sign. We will read it and convert it into vibrations for you.", Action.Companion.ROW_TYPE.CAMERA_OCR)
-                actionList.add(action5)
+              //  actionList.add(action5)
             /*    if (BuildConfig.DEBUG) {
                     //Only for internal testing right now
                     var action5 = Action("Search with Camera", "Are you trying to find something? Use this option", Action.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION)

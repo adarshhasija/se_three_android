@@ -31,10 +31,10 @@ class FullTextFragment : Fragment() {
             it.getString(ARG_INPUT_FULL_TEXT)?.let {
                 mText = it
             }
-            it.getInt(ARG_INPUT_START_INDEX)?.let {
+            it.getInt(ARG_INPUT_START_INDEX).let {
                 mStartIndexForHighlighting = it
             }
-            it.getInt(ARG_INPUT_END_INDEX)?.let {
+            it.getInt(ARG_INPUT_END_INDEX).let {
                 mEndIndexForHighlighting = it
             }
         }

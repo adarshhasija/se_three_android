@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.view.*
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -17,9 +16,6 @@ import com.starsearth.two.listeners.SeOnTouchListener
 import kotlinx.android.synthetic.main.fragment_actions.*
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-import java.util.regex.Pattern.matches
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -93,15 +89,15 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
                         ""
                     }
                 )
-                tvMorseCode?.textSize = 20f
+                tvBraille?.textSize = 20f
             }
             else {
-                tvMorseCode?.text = ""
+                tvBraille?.text = ""
             }
 
 
             var instructions = ""
-            if (tvMorseCode?.text.isNullOrBlank() == true) {
+            if (tvBraille?.text.isNullOrBlank() == true) {
                 instructions = "Visually-impaired:\nTap to hear the text"
             }
             else {
@@ -134,7 +130,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
                 "RESULT_SUCCESS"
             )
             tvAlphanumerics?.text = text
-            tvMorseCode?.text = ""
+            tvBraille?.text = ""
         /*    val p: Pattern = Pattern.compile("a-zA-Z0-9 ")
             val m: Matcher = p.matcher(text)
             setMorseCodeText(
@@ -144,7 +140,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
                     ""
                 }
             )   */
-            tvMorseCode?.textSize = 20f
+            tvBraille?.textSize = 20f
             val str = "Swipe left to reset"
             tvInstructions?.text = str
             view?.contentDescription = text + "\n" + str
@@ -213,9 +209,9 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
         }
         else {
             (mContext.applicationContext as? StarsEarthApplication)?.textToSpeech?.stop()
-            var currentMorseCodeText = tvMorseCode.text.toString()
+            var currentMorseCodeText = tvBraille.text.toString()
             currentMorseCodeText += "."
-            tvMorseCode?.text = currentMorseCodeText
+            tvBraille?.text = currentMorseCodeText
             val difference = 3 - currentMorseCodeText.length
             if (currentMorseCodeText.length < 1) {
                 tvInstructions?.text = startingInstruction
@@ -259,13 +255,13 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
         for (alphanumeric in alphanimericStr) {
             mcString += morseCode.alphabetToMCMap[alphanumeric.toString()] + "|"
         }
-        tvMorseCode?.text = mcString
-        tvMorseCode?.textSize = 20f
+        tvBraille?.text = mcString
+        tvBraille?.textSize = 20f
     }
 
     override fun gestureSwipeUp() {
         if (tvAlphanumerics?.text?.isEmpty() == true) {
-            var currentMorseCodeText = tvMorseCode.text.toString()
+            var currentMorseCodeText = tvBraille.text.toString()
             if (currentMorseCodeText.length >= 3) {
                 (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
                     mContext,
@@ -355,9 +351,9 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
         }
         else {
             (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext, "RESULT_SUCCESS")
-            var currentMorseCodeText = tvMorseCode.text.toString()
+            var currentMorseCodeText = tvBraille.text.toString()
             currentMorseCodeText = currentMorseCodeText.dropLast(1)
-            tvMorseCode?.text = currentMorseCodeText
+            tvBraille?.text = currentMorseCodeText
             val difference = 3 - currentMorseCodeText.length
             if (currentMorseCodeText.length >= 3) {
                 val str = "Swipe up to open camera"
@@ -401,8 +397,8 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     override fun gestureSwipeRight() {
         //We have to be in reading mode
         //we have to have morse code text
-        if (inputAlphanumeric != null && tvMorseCode.text.isNullOrBlank() == false) {
-            if (mMorseCodeIndex < tvMorseCode.text.length) mMorseCodeIndex++
+        if (inputAlphanumeric != null && tvBraille.text.isNullOrBlank() == false) {
+            if (mMorseCodeIndex < tvBraille.text.length) mMorseCodeIndex++
             mcScroll()
         }
         else {
@@ -428,7 +424,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
     }
 
     fun mcScroll() {
-        val text = tvMorseCode.text
+        val text = tvBraille.text
         if (mMorseCodeIndex < 0 || mMorseCodeIndex >= text.length) {
             (mContext.applicationContext as? StarsEarthApplication)?.vibrate(
                 mContext,
@@ -463,7 +459,7 @@ class ActionsFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface
             )
         }
 
-        tvMorseCode.setText(spannable, TextView.BufferType.SPANNABLE)
+        tvBraille.setText(spannable, TextView.BufferType.SPANNABLE)
         if (text[mMorseCodeIndex] == '.') {
             (mContext.applicationContext as? StarsEarthApplication)?.vibrate(mContext, "MC_DOT")
         }
