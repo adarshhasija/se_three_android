@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity(),
                     ChatModeFragment.OnChatModeFragmentInteractionListener,
                     TalkingFragment.OnFragmentInteractionListener,
                     ChatListItemFragment.OnChatListFragmentInteractionListener,
-                    ActionsFragment.OnActionsFragmentInteractionListener,
                     ActionFragment.OnActionFragmentInteractionListener,
                     ActionListFragment.OnActionListFragmentInteractionListener,
                     TypingFragment.OnTypingFragmentInteractionListener {
@@ -309,28 +308,12 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    override fun openCameraActivity() {
-        val intent = Intent(this, CameraActivity::class.java)
-        startActivityForResult(intent, CAMERA_ACTIVITY)
-    }
-
     fun openCameraActivityFromActionsList(mode: Action.Companion.ROW_TYPE) {
         val bundle = Bundle()
         bundle.putSerializable(Action.Companion.ROW_TYPE.ROW_TYPE_KEY.toString(), mode)
         val intent = Intent(this, CameraActivity::class.java)
         intent.putExtras(bundle)
         startActivityForResult(intent, CAMERA_ACTIVITY)
-    }
-
-    override fun openAction(alphanimeric: String) {
-        val actionsFragment : Fragment = ActionsFragment.newInstance(alphanimeric)
-        openNewFragment(actionsFragment, ActionsFragment.TAG)
-    }
-
-    override fun openFromActionScreen(screen: String) {
-        //Currently only being used to open chat mode
-        val chatModeFragment = ChatModeFragment.newInstance("","")
-        openNewFragment(chatModeFragment, ChatModeFragment.TAG)
     }
 
     override fun openActionFromActionScreen(action: String) {
