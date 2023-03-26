@@ -370,7 +370,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun openActionFromActionScreenManualInput(action: String, inputText: String) {
-        val re = Regex("[^A-Za-z0-9\n ]")
+        val re = Regex("[^A-Za-z0-9:\n ]")
         var filteredInputText = re.replace(inputText, "")
         filteredInputText = filteredInputText.replace("\\s+".toRegex(), " ") //multiple spaces between charaacters
         filteredInputText = filteredInputText.replace("\\n+".toRegex(), " ") //newlines.
