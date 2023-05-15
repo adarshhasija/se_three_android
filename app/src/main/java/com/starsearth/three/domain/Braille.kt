@@ -415,15 +415,16 @@ class Braille {
         //flashBrailleGridChange()
     }
 
-    fun getStartAndEndIndexInFullStringOfHighlightedPortion() : HashMap<String, Any> {
-        var text = ""
+    fun getStartAndEndIndexInFullStringOfHighlightedPortion(alphanumeric: String) : HashMap<String, Any> {
+        val text = alphanumeric.trim() //""
         var startIndexForHighlighting = 0
         var endIndexForHighlighting = 0
-        for (word in mArrayWordsInString) {
+    /*    for (word in mArrayWordsInString) {
             text += word
             text += " "
         }
         text = text.trim() //This is to trim the last space at the end of the last for loop above
+        */
         for (i in mArrayWordsInString.indices) {
             if (i < mArrayWordsInStringIndex) {
                 startIndexForHighlighting += mArrayWordsInString[i].length //Need to increment by length of  the word that was completed

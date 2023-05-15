@@ -21,7 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.PermissionChecker
 import androidx.fragment.app.Fragment
 import com.starsearth.three.application.StarsEarthApplication
-import com.starsearth.three.domain.Action
+import com.starsearth.three.domain.Content
 import com.starsearth.three.domain.ChatListItem
 import com.starsearth.three.fragments.*
 import com.starsearth.three.fragments.lists.ActionListFragment
@@ -308,9 +308,9 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    fun openCameraActivityFromActionsList(mode: Action.Companion.ROW_TYPE) {
+    fun openCameraActivityFromActionsList(mode: Content.Companion.ROW_TYPE) {
         val bundle = Bundle()
-        bundle.putSerializable(Action.Companion.ROW_TYPE.ROW_TYPE_KEY.toString(), mode)
+        bundle.putSerializable(Content.Companion.ROW_TYPE.ROW_TYPE_KEY.toString(), mode)
         val intent = Intent(this, CameraActivity::class.java)
         intent.putExtras(bundle)
         startActivityForResult(intent, CAMERA_ACTIVITY)
@@ -375,28 +375,40 @@ class MainActivity : AppCompatActivity(),
         openNewFragment(fullTextFragment, FullTextFragment.TAG)
     }
 
-    override fun onActionListItemInteraction(action: Action) {
-        if (action.rowType == Action.Companion.ROW_TYPE.TIME_12HR) {
+    override fun onActionListItemInteraction(content: Content) {
+        if (content.rowType == Content.Companion.ROW_TYPE.TIME_12HR) {
             //Analytics call is in ActionFragment
             openActionFromActionsListScreen("TIME")
         }
-        else if (action.rowType == Action.Companion.ROW_TYPE.DATE) {
+        else if (content.rowType == Content.Companion.ROW_TYPE.DATE) {
             //Analytics call is in ActionFragment
             openActionFromActionsListScreen("DATE")
         }
-        else if (action.rowType == Action.Companion.ROW_TYPE.BATTERY_LEVEL) {
+        else if (content.rowType == Content.Companion.ROW_TYPE.BATTERY_LEVEL) {
             //Analytics call is in ActionFragment
             openActionFromActionsListScreen("BATTERY_LEVEL")
         }
-        else if (action.rowType == Action.Companion.ROW_TYPE.MANUAL) {
+        else if (content.rowType == Content.Companion.ROW_TYPE.MANUAL) {
             //Analytics call is in ActionFragment
             dialogForManualEntry()
         }
-        else if (action.rowType == Action.Companion.ROW_TYPE.CAMERA_OCR) {
+        else if (content.rowType == Content.Companion.ROW_TYPE.CONTENT) {
+            if (content.description != null) {
+                val actionFragment = ActionFragment.newInstance(Content.Companion.ROW_TYPE.MANUAL.toString(), content.description!!)
+                openNewFragment(actionFragment, ActionFragment.TAG)
+            }
+            else {
+                Toast.makeText(applicationContext, "There is no content  to show", Toast.LENGTH_SHORT).show()
+            }
+        }
+        else if (content.rowType == Content.Companion.ROW_TYPE.TAG_FOR_SEARCH) {
+            (supportFragmentManager.fragments.last() as? ActionListFragment)?.userSelectedTagForSearch(content.title)
+        }
+        else if (content.rowType == Content.Companion.ROW_TYPE.CAMERA_OCR) {
             (application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_CAMERA_OCR"
             )
-            openCameraActivityFromActionsList(action.rowType)
+            openCameraActivityFromActionsList(content.rowType)
         }
     }
 
@@ -406,6 +418,10 @@ class MainActivity : AppCompatActivity(),
 
     override fun openActionFromActionsListScreenWithManualInput(inputText: String) {
         openActionFromActionScreenManualInput("MANUAL", inputText)
+    }
+
+    override fun openManualEntryFromActionsListNavBar() {
+        dialogForManualEntry()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

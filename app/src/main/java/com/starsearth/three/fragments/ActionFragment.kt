@@ -17,7 +17,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.starsearth.three.R
 import com.starsearth.three.application.StarsEarthApplication
-import com.starsearth.three.domain.Action
+import com.starsearth.three.domain.Content
 import com.starsearth.three.domain.Braille
 import com.starsearth.three.domain.MorseCode
 import com.starsearth.three.utils.CustomVibrationPatternsUtils
@@ -43,7 +43,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
     // TODO: Rename and change types of parameters
     private lateinit var mContext : Context
     var mView : View? = null //When we return to this fragment from another fragment we are losing the data. So we are using this to store it
-    private var mInputAction: Action.Companion.ROW_TYPE? = null
+    private var mInputContent: Content.Companion.ROW_TYPE? = null
     private var mInputText : String? = null
     private val morseCode = MorseCode()
     private var listener: OnActionFragmentInteractionListener? = null
@@ -123,7 +123,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             }
         }
         btnFullText?.setOnClickListener {
-            val map = braille.getStartAndEndIndexInFullStringOfHighlightedPortion()
+            val map = braille.getStartAndEndIndexInFullStringOfHighlightedPortion(mInputText ?: "")
             listener?.fromActionFragmentFullTextButtonTapped(map["text"] as String, map["start_index"] as Int, map["end_index"] as Int)
         }
         btnReset?.setOnClickListener {
@@ -132,7 +132,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         }
 
 
-        if (mInputAction == Action.Companion.ROW_TYPE.TIME_12HR) {
+        if (mInputContent == Content.Companion.ROW_TYPE.TIME_12HR) {
             //TIME
             (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_TIME"
@@ -145,7 +145,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             tvBraille?.text = dotsDashesMap.get("FINAL_STRING") as? String
             mInstructionsStringArray = dotsDashesMap.get("FINAL_INSTRUCTIONS") as? ArrayList<String>
         }
-        else if (mInputAction == Action.Companion.ROW_TYPE.DATE) {
+        else if (mInputContent == Content.Companion.ROW_TYPE.DATE) {
             //DATE
             (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_DATE"
@@ -160,7 +160,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
             tvBraille?.text = dotsDashesMap.get("FINAL_STRING") as? String
             mInstructionsStringArray = dotsDashesMap.get("FINAL_INSTRUCTIONS") as? ArrayList<String>
         }
-        else if (mInputAction == Action.Companion.ROW_TYPE.BATTERY_LEVEL) {
+        else if (mInputContent == Content.Companion.ROW_TYPE.BATTERY_LEVEL) {
             //BATTERY_LEVEL
             (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_BATTERY"
@@ -176,7 +176,7 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
                 return
             }
         }
-        else if (mInputAction == Action.Companion.ROW_TYPE.MANUAL) {
+        else if (mInputContent == Content.Companion.ROW_TYPE.MANUAL) {
             (activity?.application as? StarsEarthApplication)?.analyticsManager?.sendAnalyticsForAction(
                 "action_MANUAL"
             )
@@ -186,9 +186,8 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
                 splitList?.let {
                     btnFullText?.visibility = View.VISIBLE //Means its more than 1 word
                     for (item in it) braille.mArrayWordsInString.add(item)
-                    mInputText = braille.mArrayWordsInString.first()
                     braille.mArrayBrailleGridsForCharsInWord.addAll(braille.convertAlphanumericToBrailleWithContractions(mInputText ?: "") ?: ArrayList())
-                    tvAlphanumerics?.text = mInputText
+                    tvAlphanumerics?.text = braille.mArrayWordsInString.first()
                     tvBraille?.text = braille.mArrayBrailleGridsForCharsInWord.first().brailleDots
                     mainHandler = Handler(Looper.getMainLooper())
                     //autoPlay()
@@ -217,16 +216,16 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         arguments?.let {
             it.getString(ARG_INPUT_ACTION)?.let {
                 if (it == "TIME") {
-                    mInputAction = Action.Companion.ROW_TYPE.TIME_12HR
+                    mInputContent = Content.Companion.ROW_TYPE.TIME_12HR
                 }
                 else if (it == "DATE") {
-                    mInputAction = Action.Companion.ROW_TYPE.DATE
+                    mInputContent = Content.Companion.ROW_TYPE.DATE
                 }
                 else if (it == "BATTERY_LEVEL") {
-                    mInputAction = Action.Companion.ROW_TYPE.BATTERY_LEVEL
+                    mInputContent = Content.Companion.ROW_TYPE.BATTERY_LEVEL
                 }
                 else if (it == "MANUAL") {
-                    mInputAction = Action.Companion.ROW_TYPE.MANUAL
+                    mInputContent = Content.Companion.ROW_TYPE.MANUAL
                 }
             }
             it.getString(ARG_INPUT_TEXT)?.let {
@@ -464,9 +463,9 @@ class ActionFragment : Fragment(), SeOnTouchListener.OnSeTouchListenerInterface 
         }
 
         //Highlighting alphanumeric portion
-        if (mInputAction == Action.Companion.ROW_TYPE.TIME_12HR
-            || mInputAction == Action.Companion.ROW_TYPE.DATE
-            || mInputAction == Action.Companion.ROW_TYPE.BATTERY_LEVEL) {
+        if (mInputContent == Content.Companion.ROW_TYPE.TIME_12HR
+            || mInputContent == Content.Companion.ROW_TYPE.DATE
+            || mInputContent == Content.Companion.ROW_TYPE.BATTERY_LEVEL) {
             //If its TIME or DATE or BATTERY LEVEL, it is custom vibrations. No need to highlight alphanumerics
             return
         }

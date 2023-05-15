@@ -25,7 +25,6 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.camera.core.*
-import androidx.camera.core.ImageAnalysis.STRATEGY_BLOCK_PRODUCER
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -36,13 +35,10 @@ import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
 import com.google.mlkit.vision.objects.defaults.PredefinedCategory
 import com.google.mlkit.vision.text.TextRecognition
 import com.starsearth.three.application.StarsEarthApplication
-import com.starsearth.three.domain.Action
-import com.starsearth.two.listeners.SeOnTouchListener
+import com.starsearth.three.domain.Content
 import kotlinx.android.synthetic.main.activity_camera.*
 import java.io.File
 import java.nio.ByteBuffer
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -52,7 +48,7 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
     private var imageCapture: ImageCapture? = null
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
-    private var mRowType : Action.Companion.ROW_TYPE? = null
+    private var mRowType : Content.Companion.ROW_TYPE? = null
     private var mObjectDetector : ObjectDetector? = null
 
     private lateinit var outputDirectory: File
@@ -64,11 +60,11 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         intent.extras?.let {
-            mRowType = it.get(Action.Companion.ROW_TYPE.ROW_TYPE_KEY.toString()) as? Action.Companion.ROW_TYPE
-            if (mRowType == Action.Companion.ROW_TYPE.CAMERA_OCR) {
+            mRowType = it.get(Content.Companion.ROW_TYPE.ROW_TYPE_KEY.toString()) as? Content.Companion.ROW_TYPE
+            if (mRowType == Content.Companion.ROW_TYPE.CAMERA_OCR) {
                 tvInstructions?.text = "Point your camera at the door\nWe will tell you the text"
             }
-            else if (mRowType == Action.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION) {
+            else if (mRowType == Content.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION) {
                 // Live detection and tracking
                 val options = ObjectDetectorOptions.Builder()
                     .setDetectorMode(ObjectDetectorOptions.STREAM_MODE)
@@ -235,11 +231,11 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
 }
 
 //We dont actually need a parameter here, but we were not getting the syntax right
-private class CameraFeedAnalyzer (private val activity: Activity, private val rowType: Action.Companion.ROW_TYPE?, objectDetector: ObjectDetector?) : ImageAnalysis.Analyzer {
+private class CameraFeedAnalyzer (private val activity: Activity, private val rowType: Content.Companion.ROW_TYPE?, objectDetector: ObjectDetector?) : ImageAnalysis.Analyzer {
 
     private val ORIENTATIONS = SparseIntArray()
     private var mActivity: Activity
-    private var mRowType: Action.Companion.ROW_TYPE?
+    private var mRowType: Content.Companion.ROW_TYPE?
     private var mObjectDetector : ObjectDetector?
 
     init {
@@ -296,7 +292,7 @@ private class CameraFeedAnalyzer (private val activity: Activity, private val ro
 
         if (mediaImage != null) {
             val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-            if (rowType == Action.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION) {
+            if (rowType == Content.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION) {
                 mObjectDetector?.process(image)
                     ?.addOnSuccessListener { detectedObjects ->
                         Log.d(rowType.toString(), "*******SUCCESS***********"+detectedObjects.size)

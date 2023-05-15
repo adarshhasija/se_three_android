@@ -2,18 +2,24 @@ package com.starsearth.three.fragments.lists
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.*
+import android.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.DividerItemDecoration
-import com.starsearth.three.BuildConfig
 import com.starsearth.three.R
 import com.starsearth.three.adapter.MyActionRecyclerViewAdapter
-import com.starsearth.three.domain.Action
-import com.starsearth.three.domain.ChatListItem
+import com.starsearth.three.domain.Content
+import kotlinx.android.synthetic.main.fragment_action_list_list.*
 import kotlinx.android.synthetic.main.fragment_action_list_list.view.*
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.IOException
+import java.io.InputStream
+
 
 /**
  * A fragment representing a list of Items.
@@ -41,8 +47,8 @@ class ActionListFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_action_list_list, container, false)
 
         // Set the adapter
-        if (view is RecyclerView) {
-            with(view) {
+        if (view.list is RecyclerView) {
+            with(view.list) {
                 layoutManager = when {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
@@ -52,26 +58,72 @@ class ActionListFragment : Fragment() {
                     DividerItemDecoration.VERTICAL)
                 )
 
-                val actionList = ArrayList<Action>()
-                val action1 = Action("Time", "12 hour format", Action.Companion.ROW_TYPE.TIME_12HR)
-                actionList.add(action1)
-                val action2 = Action("Date", "Date and day of the week", Action.Companion.ROW_TYPE.DATE)
-                actionList.add(action2)
-                val action3 = Action("Battery Level", "Of this device as a percentage", Action.Companion.ROW_TYPE.BATTERY_LEVEL)
-                actionList.add(action3)
-                val action4 = Action("Manual", "Enter letters or numbers are we will convert it into braille and play it as vibrations", Action.Companion.ROW_TYPE.MANUAL)
-                actionList.add(action4)
+                val contentList = ArrayList<Content>()
+                val content1 = Content("Time", "12 hour format", arrayListOf("others"), Content.Companion.ROW_TYPE.TIME_12HR)
+                contentList.add(content1)
+                val content2 = Content("Date", "Date and day of the week", arrayListOf("others"), Content.Companion.ROW_TYPE.DATE)
+                contentList.add(content2)
+                val content3 = Content("Battery Level", "Of this device as a percentage", arrayListOf("others"), Content.Companion.ROW_TYPE.BATTERY_LEVEL)
+                contentList.add(content3)
+            /*    val content4 = Content("Manual", "Enter letters or numbers are we will convert it into braille and play it as vibrations", Content.Companion.ROW_TYPE.MANUAL)
+                contentList.add(content4)
                 val action5 = Action("Camera", "Want to read a sign like a flat number? Point the camera at a sign. We will read it and convert it into vibrations for you.", Action.Companion.ROW_TYPE.CAMERA_OCR)
-              //  actionList.add(action5)
-            /*    if (BuildConfig.DEBUG) {
+                actionList.add(action5)
+                if (BuildConfig.DEBUG) {
                     //Only for internal testing right now
                     var action5 = Action("Search with Camera", "Are you trying to find something? Use this option", Action.Companion.ROW_TYPE.CAMERA_OBJECT_DETECTION)
                     actionList.add(action5)
                 } */
-                adapter = MyActionRecyclerViewAdapter(actionList, mContext, mListener)
+                try {
+                    val obj = JSONObject(loadJSONFromAsset())
+                    val m_jArry = obj.getJSONArray("content")
+                    for (i in 0 until m_jArry.length()) {
+                        val jo_inside = m_jArry.getJSONObject(i)
+                        Log.d("Details-->", jo_inside.getString("title"))
+                        val id = jo_inside.getString("id")
+                        val title = jo_inside.getString("title")
+                        val actualContent = jo_inside.getString("content")
+                        val tagsJSONArray = jo_inside.getJSONArray("tags")
+                        val tags = ArrayList<String>()
+                        for (j in 0 until tagsJSONArray.length()) {
+                            val tagString = tagsJSONArray.getString(j)
+                            tags.add(tagString)
+                        }
+
+                        //Add your values in your `ArrayList` as below:
+                        val content = Content(title, actualContent, tags, Content.Companion.ROW_TYPE.CONTENT)
+                        contentList.add(content)
+                    }
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                }
+                adapter = MyActionRecyclerViewAdapter(contentList, mContext, mListener)
             }
         }
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                (view.list.adapter as? MyActionRecyclerViewAdapter)?.filter?.filter(newText)
+                return false
+            }
+        })
+        searchView.setOnQueryTextFocusChangeListener(object : View.OnFocusChangeListener{
+            override fun onFocusChange(p0: View?, p1: Boolean) {
+                if (p1 == true) {
+                    showTagsListToDisplay()
+                }
+            }
+        })
+
     }
 
     override fun onAttach(context: Context) {
@@ -113,15 +165,57 @@ class ActionListFragment : Fragment() {
             mListener?.openActionFromActionsListScreen("SETTINGS")
             return true;
         }
+        if (id == R.id.action_manual) {
+            mListener?.openManualEntryFromActionsListNavBar()
+            return true
+        }
 
         return super.onOptionsItemSelected(item)
     }
 
+    fun loadJSONFromAsset(): String? {
+        var json: String? = null
+        json = try {
+            val `is`: InputStream = activity!!.assets.open("Content.json")
+            val size: Int = `is`.available()
+            val buffer = ByteArray(size)
+            `is`.read(buffer)
+            `is`.close()
+            String(buffer)
+        } catch (ex: IOException) {
+            ex.printStackTrace()
+            return null
+        }
+        return json
+    }
+
+    private fun showTagsListToDisplay() {
+        val tagsListToDisplay = getTagsListToDisplay()
+        (list.adapter as? MyActionRecyclerViewAdapter)?.updateData(tagsListToDisplay)
+    }
+
+    private fun getTagsListToDisplay() : ArrayList<Content> {
+        val contentList = ArrayList<Content>()
+        val content1 = Content("nursery rhymes", "", arrayListOf(), Content.Companion.ROW_TYPE.TAG_FOR_SEARCH)
+        contentList.add(content1)
+        val content2 = Content("christmas carols", "", arrayListOf(), Content.Companion.ROW_TYPE.TAG_FOR_SEARCH)
+        contentList.add(content2)
+        val content3 = Content("others", "", arrayListOf(), Content.Companion.ROW_TYPE.TAG_FOR_SEARCH)
+        contentList.add(content3)
+
+        return contentList
+    }
+
+    fun userSelectedTagForSearch(tagString : String) {
+        searchView?.setQuery(tagString, true)
+    }
+
     interface OnActionListFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onActionListItemInteraction(action: Action)
+        fun onActionListItemInteraction(content: Content)
         fun openActionFromActionsListScreen(action: String)
         fun openActionFromActionsListScreenWithManualInput(inputText: String)
+        fun openManualEntryFromActionsListNavBar()
     }
 
 

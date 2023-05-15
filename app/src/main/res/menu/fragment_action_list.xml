@@ -3,6 +3,13 @@
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+            android:id="@+id/action_manual"
+            android:title="Manual Texxt Button"
+            android:orderInCategory="10"
+            android:icon="@mipmap/edit_fill0_wght400_grad0_opsz48"
+            app:showAsAction="always" />
+
+    <item
             android:id="@+id/action_settings"
             android:title="Settings Button"
             android:orderInCategory="10"
